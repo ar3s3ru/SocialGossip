@@ -1,0 +1,3 @@
+# Ignoring IDEA files and Gradle builds
+.idea/
+output/
