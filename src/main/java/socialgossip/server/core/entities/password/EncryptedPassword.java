@@ -21,11 +21,11 @@ public abstract class EncryptedPassword<T> implements Password {
         this.salt = Objects.requireNonNull(salt);
     }
 
-    protected T getHash() {
+    public T getHash() {
         return hash;
     }
 
-    protected T getSalt() {
+    public T getSalt() {
         return salt;
     }
 }
