@@ -1,3 +1,7 @@
 # Ignoring IDEA files and Gradle builds
 .idea/
 output/
+
+# Gradle stuff!
+.gradle/
+build/

@@ -1,5 +1,7 @@
 package socialgossip.server.core.entities;
 
+import socialgossip.server.core.entities.password.Password;
+
 import java.util.Locale;
 import java.util.Objects;
 
