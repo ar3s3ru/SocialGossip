@@ -2,9 +2,9 @@ package socialgossip.server.core.usecases.registration;
 
 import socialgossip.core.registration.RegistrationInput;
 import socialgossip.core.registration.RegistrationUseCase;
-import socialgossip.server.core.entities.InvalidUserIdException;
+import socialgossip.server.core.entities.user.InvalidUserIdException;
 import socialgossip.server.core.entities.password.Password;
-import socialgossip.server.core.entities.User;
+import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.usecases.AbstractUseCase;
 
