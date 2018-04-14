@@ -12,6 +12,9 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * Implementation for the {@link RegistrationUseCase}.
+ */
 public final class RegistrationInteractor
         extends AbstractUseCase<RegistrationUseCase.Input, Boolean, RegistrationErrors>
         implements RegistrationUseCase<Boolean, RegistrationErrors> {
@@ -20,8 +23,17 @@ public final class RegistrationInteractor
     private final EncryptedSchema<?> encryptedSchema;
     private final UserFactory        userFactory;
 
-    public RegistrationInteractor(final UserFactory userFactory,
-                                  final AddUserDataAccess userGateway,
+    /**
+     * Creates a new instance of a {@link RegistrationInteractor}, that implements
+     * the {@link RegistrationUseCase} logic.
+     * @param userFactory is the factory object used to create new {@link User} objects.
+     * @param userGateway is the data access object used to add new {@link User} to the
+     *                    persistence layer of the application.
+     * @param encryptedSchema is the encryption algorithm used to encrypt
+     *                        the plain-text password chosen for the new {@link User}.
+     */
+    public RegistrationInteractor(final UserFactory        userFactory,
+                                  final AddUserDataAccess  userGateway,
                                   final EncryptedSchema<?> encryptedSchema) {
         this.userGateway     = Objects.requireNonNull(userGateway);
         this.encryptedSchema = Objects.requireNonNull(encryptedSchema);
@@ -30,8 +42,8 @@ public final class RegistrationInteractor
 
     @Override
     protected void onExecute(final RegistrationUseCase.Input input,
-                             final Consumer<Boolean> onSuccess,
-                             final RegistrationErrors errors) {
+                             final Consumer<Boolean>         onSuccess,
+                             final RegistrationErrors        errors) {
         try {
             final Locale locale     = Locale.forLanguageTag(input.getLanguage());
             final Password password = encryptedSchema.from(input.getPassword());
@@ -46,6 +58,6 @@ public final class RegistrationInteractor
         } catch (GatewayException e) {
             errors.onGatewayError(e);
         }
-        // TODO(ar3s3ru): handle Exceptions as well?
+        // TODO(ar3s3ru): handle general Exceptions as well?
     }
 }

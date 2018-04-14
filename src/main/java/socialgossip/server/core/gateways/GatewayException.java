@@ -1,7 +1,10 @@
 package socialgossip.server.core.gateways;
 
-public abstract class GatewayException extends Exception {
+/**
+ * Exception raised because of a data gateway error, typically database error.
+ */
+public class GatewayException extends Exception {
     public GatewayException(final String message) {
-        super("gateway exception: " + message);
+        super("data gateway exception: " + message);
     }
 }
