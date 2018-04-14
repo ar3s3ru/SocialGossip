@@ -8,4 +8,6 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
 }
