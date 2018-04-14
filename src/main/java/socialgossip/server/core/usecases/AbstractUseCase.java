@@ -3,15 +3,14 @@ package socialgossip.server.core.usecases;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public abstract class AbstractUseCase<Input, Output>
-        implements UseCase<Input, Output> {
+public abstract class AbstractUseCase<I, O, E extends ErrorsHandler>
+        implements UseCase<I, O, E> {
 
-    protected abstract void onExecute(Input input, Consumer<Output> onSuccess, Consumer<Throwable> onError);
+    protected abstract void onExecute(I input, Consumer<O> onSuccess, E errors);
 
-    public final void execute(final Input input, final Consumer<Output> onSuccess, final Consumer<Throwable> onError) {
-        Objects.requireNonNull(input);
-        Objects.requireNonNull(onSuccess);
-        Objects.requireNonNull(onError);
-        onExecute(input, onSuccess, onError);
+    public final void execute(final I input, final Consumer<O> onSuccess, final E errors) {
+        this.onExecute(Objects.requireNonNull(input),
+                       Objects.requireNonNull(onSuccess),
+                       Objects.requireNonNull(errors));
     }
 }
