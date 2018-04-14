@@ -3,17 +3,17 @@ package socialgossip.server.security;
 import org.mindrot.jbcrypt.BCrypt;
 import socialgossip.server.core.entities.password.EncryptedPassword;
 import socialgossip.server.core.entities.password.EncryptedSchema;
+import socialgossip.server.core.entities.password.PasswordValidator;
 
 import java.util.Objects;
 
 /**
  * {@link EncryptedSchema} implementation for the {@link BCrypt} encryption algorithm.
  */
-public class BcryptSchema implements EncryptedSchema<String> {
+public class BcryptSchema extends EncryptedSchema<String> {
 
-    @Override
-    public EncryptedPassword<String> from(final String password) {
-        return encryptFrom(password);
+    public BcryptSchema(final PasswordValidator validator) {
+        super(validator);
     }
 
     /**
@@ -22,7 +22,8 @@ public class BcryptSchema implements EncryptedSchema<String> {
      * @throws NullPointerException if the input password is null.
      * @return a new encrypted {@link BcryptPassword} password.
      */
-    public BcryptPassword encryptFrom(final String password) {
+    @Override
+    protected EncryptedPassword<String> encrypt(final String password) {
         final String notNullPassword = Objects.requireNonNull(password);
         final String salt = BCrypt.gensalt();
         final String hash = BCrypt.hashpw(notNullPassword, salt);
