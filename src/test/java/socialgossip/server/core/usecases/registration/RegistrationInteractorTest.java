@@ -5,5 +5,6 @@ import org.junit.Test;
 public class RegistrationInteractorTest {
     @Test
     public void testFn() {
+
     }
 }
