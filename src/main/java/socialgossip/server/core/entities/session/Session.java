@@ -74,4 +74,12 @@ public class Session {
     public Date getExpireDate() {
         return expireDate;
     }
+
+    /**
+     * Checks if the {@link Session} is already expired.
+     * @return true if the {@link Session} is expired, false otherwise.
+     */
+    public boolean isExpired() {
+        return expireDate.toInstant().isBefore(Instant.now());
+    }
 }
