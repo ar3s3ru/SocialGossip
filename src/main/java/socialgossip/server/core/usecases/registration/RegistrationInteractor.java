@@ -1,6 +1,6 @@
 package socialgossip.server.core.usecases.registration;
 
-import socialgossip.server.core.entities.password.EncryptedSchema;
+import socialgossip.server.core.entities.password.EncryptionSchema;
 import socialgossip.server.core.entities.password.InvalidPasswordException;
 import socialgossip.server.core.entities.password.Password;
 import socialgossip.server.core.entities.user.InvalidUserException;
@@ -21,7 +21,7 @@ public final class RegistrationInteractor
         implements RegistrationUseCase<Boolean, RegistrationErrors> {
 
     private final AddUserDataAccess    userGateway;
-    private final EncryptedSchema<?>   encryptedSchema;
+    private final EncryptionSchema<?> encryptedSchema;
     private final UserFactory          userFactory;
     private final LocaleBuilderFactory localeFactory;
 
@@ -31,10 +31,10 @@ public final class RegistrationInteractor
      * {@link Locale.Builder#Builder()} constructor as {@link LocaleBuilderFactory}.
      *
      * For more documentation, see {@link RegistrationInteractor#RegistrationInteractor(
-     * UserFactory,AddUserDataAccess, EncryptedSchema, LocaleBuilderFactory)}.
+     * UserFactory,AddUserDataAccess, EncryptionSchema, LocaleBuilderFactory)}.
      */
     public RegistrationInteractor(final AddUserDataAccess userGateway,
-                                  final EncryptedSchema<?> encryptedSchema) {
+                                  final EncryptionSchema<?> encryptedSchema) {
         this(User::new, userGateway, encryptedSchema, Locale.Builder::new);
     }
 
@@ -43,11 +43,11 @@ public final class RegistrationInteractor
      * {@link Locale.Builder} constructor as {@link LocaleBuilderFactory} result.
      *
      * For more documentation, see {@link RegistrationInteractor#RegistrationInteractor(
-     * UserFactory,AddUserDataAccess, EncryptedSchema, LocaleBuilderFactory)}.
+     * UserFactory,AddUserDataAccess, EncryptionSchema, LocaleBuilderFactory)}.
      */
     public RegistrationInteractor(final UserFactory        userFactory,
                                   final AddUserDataAccess  userGateway,
-                                  final EncryptedSchema<?> encryptedSchema) {
+                                  final EncryptionSchema<?> encryptedSchema) {
         this(userFactory, userGateway, encryptedSchema, Locale.Builder::new);
     }
 
@@ -62,7 +62,7 @@ public final class RegistrationInteractor
      */
     public RegistrationInteractor(final UserFactory userFactory,
                                   final AddUserDataAccess userGateway,
-                                  final EncryptedSchema<?> encryptedSchema,
+                                  final EncryptionSchema<?> encryptedSchema,
                                   final LocaleBuilderFactory localeBuilderFactory) {
         this.userGateway     = Objects.requireNonNull(userGateway);
         this.encryptedSchema = Objects.requireNonNull(encryptedSchema);

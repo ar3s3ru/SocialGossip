@@ -3,7 +3,7 @@ package socialgossip.server.core.entities.password;
 import java.util.Objects;
 
 /**
- * Represents a {@link Password} encrypted with an {@link EncryptedSchema}.
+ * Represents a {@link Password} encrypted with an {@link EncryptionSchema}.
  * @param <T> is the type of hash and salt, typically {@link String} or byte[].
  */
 public abstract class EncryptedPassword<T> implements Password {

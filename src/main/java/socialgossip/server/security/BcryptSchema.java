@@ -2,15 +2,15 @@ package socialgossip.server.security;
 
 import org.mindrot.jbcrypt.BCrypt;
 import socialgossip.server.core.entities.password.EncryptedPassword;
-import socialgossip.server.core.entities.password.EncryptedSchema;
+import socialgossip.server.core.entities.password.EncryptionSchema;
 import socialgossip.server.core.entities.password.PasswordValidator;
 
 import java.util.Objects;
 
 /**
- * {@link EncryptedSchema} implementation for the {@link BCrypt} encryption algorithm.
+ * {@link EncryptionSchema} implementation for the {@link BCrypt} encryption algorithm.
  */
-public class BcryptSchema extends EncryptedSchema<String> {
+public class BcryptSchema extends EncryptionSchema<String> {
 
     public BcryptSchema(final PasswordValidator validator) {
         super(validator);

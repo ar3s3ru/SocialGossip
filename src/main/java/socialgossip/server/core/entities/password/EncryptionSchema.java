@@ -8,17 +8,17 @@ import java.util.Objects;
  *
  * @param <T> is the type of hash and salt parameters, typically {@link String}.
  */
-public abstract class EncryptedSchema<T> {
+public abstract class EncryptionSchema<T> {
     private final PasswordValidator validator;
 
-    protected EncryptedSchema(final PasswordValidator validator) {
+    protected EncryptionSchema(final PasswordValidator validator) {
         this.validator = Objects.requireNonNull(validator);
     }
 
     /**
      * Creates a new {@link EncryptedPassword} from a plain-text password.
      * @param password is the plain-text password.
-     * @return an {@link EncryptedPassword} using the {@link EncryptedSchema} of the implementor class.
+     * @return an {@link EncryptedPassword} using the {@link EncryptionSchema} of the implementor class.
      */
     public final EncryptedPassword<T> from(final String password)
         throws InvalidPasswordException {
