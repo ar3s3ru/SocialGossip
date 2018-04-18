@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases.registration;
+package socialgossip.server.core.gateways.user;
 
 /**
  * Exception raised when trying to add an {@link socialgossip.server.core.entities.user.User}

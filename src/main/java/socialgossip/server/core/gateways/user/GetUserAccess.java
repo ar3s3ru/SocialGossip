@@ -1,4 +1,8 @@
 package socialgossip.server.core.gateways.user;
 
-public class GetUserAccess {
+import socialgossip.server.core.entities.user.User;
+import socialgossip.server.core.gateways.GatewayException;
+
+public interface GetUserAccess {
+    User getByUsername(String username) throws GatewayException;
 }
