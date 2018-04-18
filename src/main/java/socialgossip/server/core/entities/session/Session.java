@@ -1,5 +1,6 @@
 package socialgossip.server.core.entities.session;
 
+import socialgossip.server.core.entities.auth.Permission;
 import socialgossip.server.core.entities.user.User;
 
 import java.time.Instant;
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
  * Login session that will authorize {@link User} to execute certain actions
  * inside the application.
  */
-public class Session {
+public class Session implements Permission {
     // Default expiration date is 1 day from now.
     // Can be overridden by a Session factory to produce new instances.
     private static final Supplier<Date> DEFAULT_EXPIRE_DATE_SUPPLIER =
@@ -58,9 +59,9 @@ public class Session {
 
     public Session(final String token, final User user, final Date expireDate)
         throws InvalidTokenException {
-        this.token      = checkSessionToken(token);
-        this.user       = Objects.requireNonNull(user);
-        this.expireDate = checkExpirationDate(expireDate);
+        this.token       = checkSessionToken(token);
+        this.user        = Objects.requireNonNull(user);
+        this.expireDate  = checkExpirationDate(expireDate);
     }
 
     public String getToken() {
