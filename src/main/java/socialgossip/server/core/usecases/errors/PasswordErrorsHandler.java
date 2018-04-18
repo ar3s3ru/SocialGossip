@@ -1,4 +1,8 @@
 package socialgossip.server.core.usecases.errors;
 
-public class PasswordErrorsHandler {
+import socialgossip.server.core.entities.password.InvalidPasswordException;
+import socialgossip.server.core.usecases.ErrorsHandler;
+
+public interface PasswordErrorsHandler extends ErrorsHandler {
+    void onInvalidPassword(InvalidPasswordException e);
 }
