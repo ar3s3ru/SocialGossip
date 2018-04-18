@@ -1,13 +1,14 @@
-package socialgossip.server.core.usecases.registration;
+package socialgossip.server.core.gateways.user;
 
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
+import socialgossip.server.core.usecases.registration.UserAlreadyExistsException;
 
 /**
  * Represents a DAO that enables to add new {@link User} objects
  * to a persistence layer (e.g. database, in-memory caches, etc...).
  */
-public interface AddUserDataAccess {
+public interface AddUserAccess {
     /**
      * Adds a new {@link User} to the persistence layer.
      * Raises an {@link Exception} if an error occurs.
