@@ -10,7 +10,16 @@ import java.util.function.Consumer;
  *            that happened during the {@link UseCase} execution.
  */
 @FunctionalInterface
-public interface UseCase<I, O, E extends ErrorsHandler> {
+public interface UseCase<I extends UseCase.Input, O, E extends ErrorsHandler> {
+    /**
+     * Represents the input of an {@link UseCase}.
+     * Every requests to an {@link UseCase} must have a request id, so that we can
+     * trace back every actions of the request.
+     */
+    interface Input {
+        String getRequestId();
+    }
+
     /**
      * Executes the {@link UseCase} logic.
      * @param input is the {@link UseCase} input.

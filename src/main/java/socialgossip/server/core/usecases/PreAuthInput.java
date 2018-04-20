@@ -1,5 +1,5 @@
 package socialgossip.server.core.usecases;
 
-public interface PreAuthInput {
+public interface PreAuthInput extends UseCase.Input {
     String getSessionToken();
 }

@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  * @param <E> is the {@link ErrorsHandler} for errors produced
  *            by the {@link UseCase} execution.
  */
-public abstract class AbstractUseCase<I, O, E extends ErrorsHandler>
+public abstract class AbstractUseCase<I extends UseCase.Input, O, E extends ErrorsHandler>
         implements UseCase<I, O, E> {
 
     /**
