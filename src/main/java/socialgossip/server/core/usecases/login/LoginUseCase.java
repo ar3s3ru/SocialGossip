@@ -3,6 +3,8 @@ package socialgossip.server.core.usecases.login;
 import socialgossip.server.core.usecases.ErrorsHandler;
 import socialgossip.server.core.usecases.UseCase;
 
+import java.net.InetAddress;
+
 /**
  * Use-case that allows the creation of new
  * {@link socialgossip.server.core.entities.session.Session} by login,
@@ -18,7 +20,8 @@ public interface LoginUseCase<O, E extends ErrorsHandler>
      * Represents the input of the login use-case
      */
     interface Input {
-        String getUsername();
-        String getPassword();
+        String      getUsername();
+        String      getPassword();
+        InetAddress getIpAddress();
     }
 }

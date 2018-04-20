@@ -8,6 +8,7 @@ import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.session.AddSessionAccess;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.user.GetUserAccess;
+import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.core.usecases.AbstractUseCase;
 
 import java.util.Objects;
@@ -40,13 +41,15 @@ public final class LoginInteractor
             if (user.getPassword().verify(input.getPassword())) {
                 throw new InvalidPasswordException(input.getPassword(), "doesn't match");
             }
-            final Session session = sessionFactory.produce(user);
+            final Session session = sessionFactory.produce(user, input.getIpAddress());
             sessionAccess.add(session);
             onSuccess.accept(new LoginOutput(
                     session.getToken(),
                     session.getUser().getId(),
                     session.getExpireDate()
             ));
+        } catch (UserNotFoundException e) {
+            errors.onUserNotFound(e);
         } catch (InvalidPasswordException e) {
             errors.onInvalidPassword(e);
         } catch (SessionAlreadyExistsException e) {
