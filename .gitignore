@@ -1,6 +1,9 @@
 # Ignoring IDEA files and Gradle builds
 .idea/
 output/
+*.iml
+*.ipr
+*.iws
 
 # Gradle stuff!
 .gradle/
