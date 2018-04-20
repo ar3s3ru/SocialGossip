@@ -35,7 +35,7 @@ public final class RegistrationInteractor
      * For more documentation, see {@link RegistrationInteractor#RegistrationInteractor(
      * UserFactory, AddUserAccess, EncryptionSchema, LocaleBuilderFactory)}.
      */
-    public RegistrationInteractor(final AddUserAccess userGateway,
+    public RegistrationInteractor(final AddUserAccess       userGateway,
                                   final EncryptionSchema<?> encryptionSchema) {
         this(User::new, userGateway, encryptionSchema, Locale.Builder::new);
     }
@@ -47,8 +47,8 @@ public final class RegistrationInteractor
      * For more documentation, see {@link RegistrationInteractor#RegistrationInteractor(
      * UserFactory, AddUserAccess, EncryptionSchema, LocaleBuilderFactory)}.
      */
-    public RegistrationInteractor(final UserFactory        userFactory,
-                                  final AddUserAccess userGateway,
+    public RegistrationInteractor(final UserFactory         userFactory,
+                                  final AddUserAccess       userGateway,
                                   final EncryptionSchema<?> encryptionSchema) {
         this(userFactory, userGateway, encryptionSchema, Locale.Builder::new);
     }
@@ -62,9 +62,9 @@ public final class RegistrationInteractor
      * @param encryptionSchema is the encryption algorithm used to encrypt
      *                        the plain-text password chosen for the new {@link User}.
      */
-    public RegistrationInteractor(final UserFactory userFactory,
-                                  final AddUserAccess userGateway,
-                                  final EncryptionSchema<?> encryptionSchema,
+    public RegistrationInteractor(final UserFactory          userFactory,
+                                  final AddUserAccess        userGateway,
+                                  final EncryptionSchema<?>  encryptionSchema,
                                   final LocaleBuilderFactory localeBuilderFactory) {
         this.userGateway      = Objects.requireNonNull(userGateway);
         this.encryptionSchema = Objects.requireNonNull(encryptionSchema);
