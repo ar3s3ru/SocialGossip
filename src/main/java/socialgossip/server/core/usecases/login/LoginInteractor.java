@@ -34,7 +34,7 @@ public final class LoginInteractor
     }
 
     @Override
-    protected void onExecute(Input input, Consumer<LoginOutput> onSuccess, LoginErrors errors) {
+    protected void onExecute(LoginUseCase.Input input, Consumer<LoginOutput> onSuccess, LoginErrors errors) {
         try {
             final User user = userAccess.getByUsername(input.getUsername());
             passwordValidator.validate(input.getPassword());

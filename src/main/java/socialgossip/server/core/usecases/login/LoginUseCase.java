@@ -19,7 +19,7 @@ public interface LoginUseCase<O, E extends ErrorsHandler>
     /**
      * Represents the input of the login use-case
      */
-    interface Input {
+    interface Input extends UseCase.Input {
         String      getUsername();
         String      getPassword();
         InetAddress getIpAddress();
