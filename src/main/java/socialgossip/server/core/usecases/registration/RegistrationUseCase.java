@@ -15,7 +15,7 @@ public interface RegistrationUseCase<O, E extends ErrorsHandler>
     /**
      * Represents the input of the registration use-case.
      */
-    interface Input {
+    interface Input extends UseCase.Input {
         String getUsername();
         String getPassword();
         String getLanguage();
