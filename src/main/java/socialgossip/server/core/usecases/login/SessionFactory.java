@@ -3,9 +3,9 @@ package socialgossip.server.core.usecases.login;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
 
-import java.time.temporal.TemporalUnit;
+import java.net.InetAddress;
 
+@FunctionalInterface
 public interface SessionFactory {
-    Session produce(User user);
-    Session produceWithExpire(User user, long expireDelta, TemporalUnit expireUnit);
+    Session produce(User user, InetAddress ipAddress);
 }
