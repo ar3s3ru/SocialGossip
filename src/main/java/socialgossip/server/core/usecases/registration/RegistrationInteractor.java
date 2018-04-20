@@ -22,8 +22,8 @@ public final class RegistrationInteractor
         extends AbstractUseCase<RegistrationUseCase.Input, Boolean, RegistrationErrors>
         implements RegistrationUseCase<Boolean, RegistrationErrors> {
 
-    private final AddUserAccess userGateway;
-    private final EncryptionSchema<?> encryptedSchema;
+    private final AddUserAccess        userGateway;
+    private final EncryptionSchema<?>  encryptionSchema;
     private final UserFactory          userFactory;
     private final LocaleBuilderFactory localeFactory;
 
@@ -36,8 +36,8 @@ public final class RegistrationInteractor
      * UserFactory, AddUserAccess, EncryptionSchema, LocaleBuilderFactory)}.
      */
     public RegistrationInteractor(final AddUserAccess userGateway,
-                                  final EncryptionSchema<?> encryptedSchema) {
-        this(User::new, userGateway, encryptedSchema, Locale.Builder::new);
+                                  final EncryptionSchema<?> encryptionSchema) {
+        this(User::new, userGateway, encryptionSchema, Locale.Builder::new);
     }
 
     /**
@@ -49,8 +49,8 @@ public final class RegistrationInteractor
      */
     public RegistrationInteractor(final UserFactory        userFactory,
                                   final AddUserAccess userGateway,
-                                  final EncryptionSchema<?> encryptedSchema) {
-        this(userFactory, userGateway, encryptedSchema, Locale.Builder::new);
+                                  final EncryptionSchema<?> encryptionSchema) {
+        this(userFactory, userGateway, encryptionSchema, Locale.Builder::new);
     }
 
     /**
@@ -59,17 +59,17 @@ public final class RegistrationInteractor
      * @param userFactory is the factory object used to create new {@link User} objects.
      * @param userGateway is the data access object used to add new {@link User} to the
      *                    persistence layer of the application.
-     * @param encryptedSchema is the encryption algorithm used to encrypt
+     * @param encryptionSchema is the encryption algorithm used to encrypt
      *                        the plain-text password chosen for the new {@link User}.
      */
     public RegistrationInteractor(final UserFactory userFactory,
                                   final AddUserAccess userGateway,
-                                  final EncryptionSchema<?> encryptedSchema,
+                                  final EncryptionSchema<?> encryptionSchema,
                                   final LocaleBuilderFactory localeBuilderFactory) {
-        this.userGateway     = Objects.requireNonNull(userGateway);
-        this.encryptedSchema = Objects.requireNonNull(encryptedSchema);
-        this.userFactory     = Objects.requireNonNull(userFactory);
-        this.localeFactory   = Objects.requireNonNull(localeBuilderFactory);
+        this.userGateway      = Objects.requireNonNull(userGateway);
+        this.encryptionSchema = Objects.requireNonNull(encryptionSchema);
+        this.userFactory      = Objects.requireNonNull(userFactory);
+        this.localeFactory    = Objects.requireNonNull(localeBuilderFactory);
     }
 
     @Override
@@ -84,7 +84,7 @@ public final class RegistrationInteractor
                             localeFactory.produce()
                                          .setLanguageTag(input.getLanguage())
                                          .build(),
-                            encryptedSchema.from(input.getPassword())
+                            encryptionSchema.from(input.getPassword())
                     )
             ));
         } catch (IllformedLocaleException e) {
