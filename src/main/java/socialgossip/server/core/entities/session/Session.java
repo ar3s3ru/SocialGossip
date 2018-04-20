@@ -3,6 +3,7 @@ package socialgossip.server.core.entities.session;
 import socialgossip.server.core.entities.auth.Permission;
 import socialgossip.server.core.entities.user.User;
 
+import java.net.InetAddress;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -53,15 +54,20 @@ public class Session implements Permission {
         return proposedToken;
     }
 
-    private final String token;
-    private final User   user;
-    private final Date   expireDate;
+    private final String      token;
+    private final User        user;
+    private final Date        expireDate;
+    private final InetAddress ipAddress;
 
-    public Session(final String token, final User user, final Date expireDate)
+    public Session(final String      token,
+                   final User        user,
+                   final Date        expireDate,
+                   final InetAddress ipAddress)
         throws InvalidTokenException {
         this.token       = checkSessionToken(token);
         this.user        = Objects.requireNonNull(user);
         this.expireDate  = checkExpirationDate(expireDate);
+        this.ipAddress   = Objects.requireNonNull(ipAddress);
     }
 
     public String getToken() {
@@ -74,6 +80,10 @@ public class Session implements Permission {
 
     public Date getExpireDate() {
         return expireDate;
+    }
+
+    public InetAddress getIpAddress() {
+        return ipAddress;
     }
 
     /**
