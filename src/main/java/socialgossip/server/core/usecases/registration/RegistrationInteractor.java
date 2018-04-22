@@ -9,7 +9,6 @@ import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.user.AddUserAccess;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
 import socialgossip.server.core.usecases.AbstractUseCase;
-import socialgossip.server.core.usecases.UseCase;
 import socialgossip.server.core.usecases.logging.UseCaseLogger;
 
 import java.util.IllformedLocaleException;
