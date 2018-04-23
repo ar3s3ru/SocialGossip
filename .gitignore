@@ -8,3 +8,6 @@ output/
 # Gradle stuff!
 .gradle/
 build/
+gradle/
+gradlew
+gradlew.bat
