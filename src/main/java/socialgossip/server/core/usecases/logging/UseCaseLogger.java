@@ -7,6 +7,10 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Wrapper class for {@link Logger} that can be used inside {@link UseCase} implementations
+ * for logging purposes.
+ */
 public final class UseCaseLogger {
     public static void fine(final Logger logger,
                             final UseCase.Input input,
