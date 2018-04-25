@@ -4,6 +4,8 @@ import org.junit.Test;
 import socialgossip.server.core.entities.password.Password;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
+import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
+import socialgossip.server.core.gateways.session.SessionNotFoundException;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 
@@ -77,5 +79,39 @@ public class InMemoryRepositoryTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void addNewSessionTwiceFailing() {
+        try {
+            final InMemoryRepository repository = new InMemoryRepository();
+            final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
+            repository.add(session);
+            try {
+                repository.add(session);
+            } catch (SessionAlreadyExistsException ok) {}
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void addAndRetrieveNewSession() {
+        try {
+            final InMemoryRepository repository = new InMemoryRepository();
+            final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
+            repository.add(session);
+            assertEquals(session, repository.getByToken(session.getToken()));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void retrieveNotExistentSessionFailing() {
+        try {
+            final InMemoryRepository repository = new InMemoryRepository();
+            repository.getByToken("");
+        } catch (SessionNotFoundException ok) {}
     }
 }
