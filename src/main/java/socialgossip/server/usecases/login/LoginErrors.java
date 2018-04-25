@@ -1,9 +1,9 @@
-package socialgossip.server.core.usecases.login;
+package socialgossip.server.usecases.login;
 
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
-import socialgossip.server.core.usecases.errors.GatewayErrorsHandler;
-import socialgossip.server.core.usecases.errors.PasswordErrorsHandler;
+import socialgossip.server.usecases.errors.GatewayErrorsHandler;
+import socialgossip.server.usecases.errors.PasswordErrorsHandler;
 
 /**
  * Errors handler for the {@link LoginUseCase} implementation.

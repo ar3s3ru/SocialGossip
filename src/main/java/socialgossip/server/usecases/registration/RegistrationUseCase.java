@@ -1,7 +1,7 @@
-package socialgossip.server.core.usecases.registration;
+package socialgossip.server.usecases.registration;
 
-import socialgossip.server.core.usecases.ErrorsHandler;
-import socialgossip.server.core.usecases.UseCase;
+import socialgossip.server.usecases.ErrorsHandler;
+import socialgossip.server.usecases.UseCase;
 
 /**
  * Represents a new {@link socialgossip.server.core.entities.user.User}

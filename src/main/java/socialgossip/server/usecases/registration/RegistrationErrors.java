@@ -1,9 +1,9 @@
-package socialgossip.server.core.usecases.registration;
+package socialgossip.server.usecases.registration;
 
 import socialgossip.server.core.entities.user.InvalidUserException;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
-import socialgossip.server.core.usecases.errors.GatewayErrorsHandler;
-import socialgossip.server.core.usecases.errors.PasswordErrorsHandler;
+import socialgossip.server.usecases.errors.GatewayErrorsHandler;
+import socialgossip.server.usecases.errors.PasswordErrorsHandler;
 
 import java.util.IllformedLocaleException;
 

@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases.login;
+package socialgossip.server.usecases.login;
 
 import java.util.Date;
 import java.util.Objects;

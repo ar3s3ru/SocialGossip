@@ -1,9 +1,9 @@
-package socialgossip.server.core.usecases.login;
+package socialgossip.server.usecases.login;
 
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.notifications.NotificationHandler;
-import socialgossip.server.core.usecases.ErrorsHandler;
-import socialgossip.server.core.usecases.UseCase;
+import socialgossip.server.usecases.ErrorsHandler;
+import socialgossip.server.usecases.UseCase;
 
 import java.net.InetAddress;
 import java.util.function.Function;

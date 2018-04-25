@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases;
+package socialgossip.server.usecases;
 
 import socialgossip.server.core.entities.auth.UnauthorizedException;
 import socialgossip.server.core.gateways.GatewayException;

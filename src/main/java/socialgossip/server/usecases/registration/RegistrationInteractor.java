@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases.registration;
+package socialgossip.server.usecases.registration;
 
 import socialgossip.server.core.entities.password.EncryptionSchema;
 import socialgossip.server.core.entities.password.InvalidPasswordException;
@@ -8,8 +8,8 @@ import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.user.AddUserAccess;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
-import socialgossip.server.core.usecases.AbstractUseCase;
-import socialgossip.server.core.usecases.logging.UseCaseLogger;
+import socialgossip.server.usecases.AbstractUseCase;
+import socialgossip.server.usecases.logging.UseCaseLogger;
 
 import java.util.IllformedLocaleException;
 import java.util.Locale;

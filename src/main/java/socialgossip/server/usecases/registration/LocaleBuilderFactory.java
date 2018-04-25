@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases.registration;
+package socialgossip.server.usecases.registration;
 
 import java.util.Locale;
 

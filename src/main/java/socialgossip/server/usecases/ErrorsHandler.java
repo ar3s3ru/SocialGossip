@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases;
+package socialgossip.server.usecases;
 
 /**
  * Represents an handler, or callback, that handles error cases occurred

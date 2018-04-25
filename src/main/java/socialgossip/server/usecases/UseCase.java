@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases;
+package socialgossip.server.usecases;
 
 import java.util.function.Consumer;
 

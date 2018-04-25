@@ -1,4 +1,4 @@
-package socialgossip.server.core.usecases.login;
+package socialgossip.server.usecases.login;
 
 import socialgossip.server.core.entities.password.InvalidPasswordException;
 import socialgossip.server.core.entities.password.PasswordValidator;
@@ -11,7 +11,7 @@ import socialgossip.server.core.gateways.session.AddSessionAccess;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.user.GetUserAccess;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
-import socialgossip.server.core.usecases.AbstractUseCase;
+import socialgossip.server.usecases.AbstractUseCase;
 
 import java.util.Objects;
 import java.util.function.Consumer;

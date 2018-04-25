@@ -1,7 +1,7 @@
-package socialgossip.server.core.usecases.errors;
+package socialgossip.server.usecases.errors;
 
 import socialgossip.server.core.entities.password.InvalidPasswordException;
-import socialgossip.server.core.usecases.ErrorsHandler;
+import socialgossip.server.usecases.ErrorsHandler;
 
 /**
  * Error handler to be used when passwords have to be provided and verified.

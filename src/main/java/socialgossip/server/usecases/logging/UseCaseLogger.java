@@ -1,6 +1,6 @@
-package socialgossip.server.core.usecases.logging;
+package socialgossip.server.usecases.logging;
 
-import socialgossip.server.core.usecases.UseCase;
+import socialgossip.server.usecases.UseCase;
 
 import java.util.Optional;
 import java.util.function.Supplier;
