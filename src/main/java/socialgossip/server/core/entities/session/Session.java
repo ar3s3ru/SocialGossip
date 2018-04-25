@@ -61,6 +61,12 @@ public class Session implements Permission {
 
     public Session(final String      token,
                    final User        user,
+                   final InetAddress ipAddress) throws InvalidTokenException {
+        this(token, user, DEFAULT_EXPIRE_DATE_SUPPLIER.get(), ipAddress);
+    }
+
+    public Session(final String      token,
+                   final User        user,
                    final Date        expireDate,
                    final InetAddress ipAddress) throws InvalidTokenException {
         this.token       = checkSessionToken(token);
