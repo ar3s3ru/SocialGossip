@@ -18,15 +18,26 @@ import java.util.Optional;
 public class InMemoryRepository
         implements AddUserAccess, GetUserAccess, AddSessionAccess, GetSessionAccess {
 
-    private final HashMap<String, User>    userMap    = new HashMap<>();
-    private final HashMap<String, Session> sessionMap = new HashMap<>();
+    private final HashMap<String, User>    userMap;
+    private final HashMap<String, Session> sessionMap;
+
+    public InMemoryRepository() {
+        this(null, null);
+    }
+
+    InMemoryRepository(final HashMap<String, User> userMap,
+                       final HashMap<String, Session> sessionMap) {
+        this.userMap    = Optional.ofNullable(userMap).orElseGet(HashMap::new);
+        this.sessionMap = Optional.ofNullable(sessionMap).orElseGet(HashMap::new);
+    }
 
     @Override
     public boolean add(final User user) throws UserAlreadyExistsException {
         synchronized (userMap) {
             Objects.requireNonNull(user);
-            Optional.ofNullable(userMap.putIfAbsent(user.getId(), user))
-                    .orElseThrow(() -> new UserAlreadyExistsException(user.getId()));
+            if (Objects.nonNull(userMap.putIfAbsent(user.getId(), user))){
+                throw new UserAlreadyExistsException(user.getId());
+            }
             return true;
         }
     }
@@ -44,10 +55,11 @@ public class InMemoryRepository
     public void add(final Session session) throws SessionAlreadyExistsException {
         synchronized (sessionMap) {
             Objects.requireNonNull(session);
-            Optional.ofNullable(sessionMap.putIfAbsent(session.getToken(), session))
-                    .orElseThrow(() -> new SessionAlreadyExistsException(
-                            session.getToken(), session.getUser().getId()
-                    ));
+            if (Objects.nonNull(sessionMap.putIfAbsent(session.getToken(), session))) {
+                throw new SessionAlreadyExistsException(
+                        session.getToken(), session.getUser().getId()
+                );
+            }
         }
     }
 
