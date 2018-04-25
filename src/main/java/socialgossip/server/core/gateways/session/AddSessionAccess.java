@@ -10,6 +10,11 @@ import socialgossip.server.core.gateways.GatewayException;
 public interface AddSessionAccess {
     /**
      * Adds a new {@link Session} to the persistence storage.
+     *
+     * When added, all other {@link Session}s of the same
+     * {@link socialgossip.server.core.entities.user.User} will be removed from the
+     * persistence storage.
+     *
      * @param session is the {@link Session} to add.
      * @throws SessionAlreadyExistsException if the {@link Session} token already exists.
      * @throws GatewayException if there's been an external error with the persistence layer,
