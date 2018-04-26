@@ -31,7 +31,9 @@ public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends Prot
         } catch (GatewayException e) {
             errors.onGatewayError(e);
         } catch (SessionNotFoundException e) {
-            errors.onSessionNotFound(e);
+            errors.onUnauthorizedAccess(
+                    new UnauthorizedException(input.getSessionToken(), e.getMessage())
+            );
         } catch (UnauthorizedException e) {
             errors.onUnauthorizedAccess(e);
         }
