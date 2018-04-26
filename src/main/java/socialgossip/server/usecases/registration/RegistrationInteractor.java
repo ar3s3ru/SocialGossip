@@ -1,5 +1,6 @@
 package socialgossip.server.usecases.registration;
 
+import socialgossip.server.core.entities.password.EncryptedPassword;
 import socialgossip.server.core.entities.password.EncryptionSchema;
 import socialgossip.server.core.entities.password.InvalidPasswordException;
 import socialgossip.server.core.entities.password.Password;
@@ -81,15 +82,10 @@ public final class RegistrationInteractor
                              final Consumer<Boolean>         onSuccess,
                              final RegistrationErrors        errors) {
         try {
-            final Locale lang = localeFactory.produce().setLanguageTag(input.getLanguage()).build();
-            UseCaseLogger.fine(LOG, input, () -> "produced new language: " + input.getLanguage());
-            final Password password = encryptionSchema.from(input.getPassword());
-            UseCaseLogger.fine(LOG, input, () -> "encrypted password successfully");
-            final User user = userFactory.produce(input.getUsername(), lang, password);
-            UseCaseLogger.fine(LOG, input, () -> "produced new User: " + user);
-            final boolean result = userGateway.add(user);
-            UseCaseLogger.fine(LOG, input, () -> "adding user to persistence layer returned: " + result);
-            onSuccess.accept(result);
+            final Locale lang = produceLanguageLocale(input);
+            final EncryptedPassword<?> password = produceEncryptedPassword(input);
+            final User user = produceNewUser(input, lang, password);
+            onSuccess.accept(trySavingNewUser(input, user));
         } catch (IllformedLocaleException e) {
             UseCaseLogger.info(LOG, input, () -> "IllformedLocaleException: " + e.getMessage());
             errors.onInvalidLanguage(e);
@@ -106,5 +102,37 @@ public final class RegistrationInteractor
             UseCaseLogger.error(LOG, input, () -> "GatewayError: " + e.getMessage());
             errors.onGatewayError(e);
         }
+    }
+
+    private Locale produceLanguageLocale(final RegistrationUseCase.Input input)
+            throws IllformedLocaleException {
+        final Locale lang = localeFactory.produce().setLanguageTag(input.getLanguage()).build();
+        UseCaseLogger.fine(LOG, input, () -> "produced new language: " + input.getLanguage());
+        return lang;
+    }
+
+    private EncryptedPassword<?> produceEncryptedPassword(final RegistrationUseCase.Input input)
+            throws InvalidPasswordException {
+        final EncryptedPassword<?> password = encryptionSchema.from(input.getPassword());
+        UseCaseLogger.fine(LOG, input, () -> "encrypted password successfully");
+        return password;
+    }
+
+    private User produceNewUser(final RegistrationUseCase.Input input,
+                                final Locale                    lang,
+                                final EncryptedPassword<?>      password)
+            throws InvalidUserException {
+        final User user = userFactory.produce(input.getUsername(), lang, password);
+        UseCaseLogger.fine(LOG, input, () -> "produced new User: " + user);
+        return user;
+    }
+
+    private boolean trySavingNewUser(final RegistrationUseCase.Input input,
+                                     final User newUser)
+            throws UserAlreadyExistsException, GatewayException {
+        UseCaseLogger.fine(LOG, input, () -> "adding user to persistence layer...");
+        final boolean result = userGateway.add(newUser);
+        UseCaseLogger.info(LOG, input, () -> "User \"" + newUser.getId() + "\" add operation result: " + result);
+        return result;
     }
 }
