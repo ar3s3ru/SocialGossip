@@ -1,4 +1,10 @@
 package socialgossip.server.usecases.logout;
 
-public class LogoutUseCase {
+import socialgossip.server.core.entities.auth.ProtectedResource;
+import socialgossip.server.usecases.PreAuthInput;
+import socialgossip.server.usecases.UseCase;
+
+public interface LogoutUseCase
+        extends UseCase<LogoutUseCase.Input, Boolean, LogoutErrors>, ProtectedResource {
+    interface Input extends PreAuthInput {}
 }
