@@ -45,9 +45,8 @@ public final class UseCaseLogger {
         Optional.ofNullable(logger)
                 // Example: "FINE    [ 000001 | 2017-01-01T00:00:01.12345Z ]    Hello world!"
                 .ifPresent(logger1 -> logger1.log(logLevel, () ->
-                        logLevel.getName() +
-                        "\t[ " + requestId +
-                        " | "  + Date.from(Instant.now()) +
+                        "[ "   + ISO8601Formatter.now() +
+                        " | "  + requestId +
                         " ]\t" + message.get()
                 ));
     }
