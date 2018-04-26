@@ -5,8 +5,8 @@ import socialgossip.server.core.entities.password.PasswordValidator;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.notifications.NotificationHandler;
 import socialgossip.server.core.gateways.notifications.Notifier;
+import socialgossip.server.core.gateways.notifications.UnsupportedNotificationException;
 import socialgossip.server.core.gateways.session.AddSessionAccess;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.user.GetUserAccess;
@@ -27,18 +27,22 @@ public final class LoginInteractor
     private final AddSessionAccess  sessionAccess;
     private final PasswordValidator passwordValidator;
     private final SessionFactory    sessionFactory;
-    private final Notifier          notifier;
 
-    public LoginInteractor(final GetUserAccess     userAccess,
-                           final AddSessionAccess  sessionAccess,
-                           final PasswordValidator passwordValidator,
-                           final SessionFactory    sessionFactory,
-                           final Notifier          notifier) {
-        this.userAccess        = Objects.requireNonNull(userAccess);
-        this.sessionAccess     = Objects.requireNonNull(sessionAccess);
-        this.passwordValidator = Objects.requireNonNull(passwordValidator);
-        this.sessionFactory    = Objects.requireNonNull(sessionFactory);
-        this.notifier          = Objects.requireNonNull(notifier);
+    private final Notifier                 notifier;
+    private final LoginNotificationFactory notificationFactory;
+
+    public LoginInteractor(final GetUserAccess            userAccess,
+                           final AddSessionAccess         sessionAccess,
+                           final PasswordValidator        passwordValidator,
+                           final SessionFactory           sessionFactory,
+                           final Notifier                 notifier,
+                           final LoginNotificationFactory notificationFactory) {
+        this.userAccess          = Objects.requireNonNull(userAccess);
+        this.sessionAccess       = Objects.requireNonNull(sessionAccess);
+        this.passwordValidator   = Objects.requireNonNull(passwordValidator);
+        this.sessionFactory      = Objects.requireNonNull(sessionFactory);
+        this.notifier            = Objects.requireNonNull(notifier);
+        this.notificationFactory = Objects.requireNonNull(notificationFactory);
     }
 
     @Override
@@ -51,12 +55,19 @@ public final class LoginInteractor
             }
             final Session session = sessionFactory.produce(user, input.getIpAddress());
             sessionAccess.add(session);
-            notifier.register(input.getFriendshipsHandler().apply(session));
-            onSuccess.accept(new LoginOutput(
-                    session.getToken(),
-                    session.getUser().getId(),
-                    session.getExpireDate()
-            ));
+
+            try {
+                notifier.register(input.getFriendshipsHandler().apply(session));
+                notifier.send(notificationFactory.produce(session));
+            } catch (UnsupportedNotificationException e) {
+                // TODO(ar3s3ru): add logging here
+            } finally {
+                onSuccess.accept(new LoginOutput(
+                        session.getToken(),
+                        session.getUser().getId(),
+                        session.getExpireDate()
+                ));
+            }
         } catch (UserNotFoundException e) {
             errors.onUserNotFound(e);
         } catch (InvalidPasswordException e) {
