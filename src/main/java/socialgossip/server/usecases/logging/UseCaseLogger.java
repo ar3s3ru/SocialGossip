@@ -2,8 +2,6 @@ package socialgossip.server.usecases.logging;
 
 import socialgossip.server.usecases.UseCase;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -42,8 +40,8 @@ public final class UseCaseLogger {
                             final Logger logger,
                             final String requestId,
                             final Supplier<String> message) {
+        // Example: "FINE: [ 2017-01-01T00:00:01.12345Z | 000001 ]    Hello world!"
         Optional.ofNullable(logger)
-                // Example: "FINE    [ 000001 | 2017-01-01T00:00:01.12345Z ]    Hello world!"
                 .ifPresent(logger1 -> logger1.log(logLevel, () ->
                         "[ "   + ISO8601Formatter.now() +
                         " | "  + requestId +
