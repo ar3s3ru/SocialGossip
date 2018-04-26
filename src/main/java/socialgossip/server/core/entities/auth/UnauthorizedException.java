@@ -7,7 +7,7 @@ import socialgossip.server.core.entities.session.Session;
  * an unauthorized {@link Permission}.
  */
 public class UnauthorizedException extends Exception {
-    public UnauthorizedException(final Session session, final String message) {
-        super("Session " + session.getToken() + " unauthorized: " + message);
+    public UnauthorizedException(final String token, final String message) {
+        super("Permission token " + token + " unauthorized: " + message);
     }
 }
