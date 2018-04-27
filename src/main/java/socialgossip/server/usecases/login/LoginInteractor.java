@@ -12,7 +12,6 @@ import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.user.GetUserAccess;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.usecases.AbstractUseCase;
-import socialgossip.server.usecases.UseCase;
 import socialgossip.server.usecases.logging.UseCaseLogger;
 
 import java.util.Objects;
@@ -35,6 +34,14 @@ public final class LoginInteractor
 
     private final Notifier                 notifier;
     private final LoginNotificationFactory notificationFactory;
+
+    public LoginInteractor(final GetUserAccess     userAccess,
+                           final AddSessionAccess  sessionAccess,
+                           final PasswordValidator passwordValidator,
+                           final SessionFactory    sessionFactory,
+                           final Notifier          notifier) {
+        this(userAccess, sessionAccess, passwordValidator, sessionFactory, notifier, LoginNotification::new);
+    }
 
     public LoginInteractor(final GetUserAccess            userAccess,
                            final AddSessionAccess         sessionAccess,
@@ -59,12 +66,16 @@ public final class LoginInteractor
             tryRegisteringAndSendingLoginNotification(input, session);
             onSuccess.accept(produceNewOutput(session));
         } catch (UserNotFoundException e) {
+            UseCaseLogger.error(LOG, input, () -> "UserNotFoundException: " + e);
             errors.onUserNotFound(e);
         } catch (InvalidPasswordException e) {
+            UseCaseLogger.error(LOG, input, () -> "InvalidPasswordException: " + e);
             errors.onInvalidPassword(e);
         } catch (SessionAlreadyExistsException e) {
+            UseCaseLogger.error(LOG, input, () -> "SessionAlreadyExistsException: " + e);
             errors.onSessionAlreadyExists(e);
         } catch (GatewayException e) {
+            UseCaseLogger.error(LOG, input, () -> "GatewayException: " + e);
             errors.onGatewayError(e);
         }
     }
