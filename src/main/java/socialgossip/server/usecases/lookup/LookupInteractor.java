@@ -2,6 +2,7 @@ package socialgossip.server.usecases.lookup;
 
 import socialgossip.server.core.entities.auth.Permission;
 import socialgossip.server.core.entities.auth.UnauthorizedException;
+import socialgossip.server.core.entities.friendship.Friendship;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.friendship.GetUserWithFriendshipAccess;
@@ -43,8 +44,8 @@ public final class LookupInteractor
                                        final Consumer<LookupDetails> onSuccess,
                                        final LookupErrors            errors) {
         try {
-            final UserFriendship details = retrieveUserFriendshipDetails(input, session);
-            onSuccess.accept(createNewLookupDetailsFrom(details));
+           final UserFriendship details = retrieveUserFriendshipDetails(input, session);
+           onSuccess.accept(createLookupDetailsResultFrom(details));
         } catch (UserNotFoundException e) {
             errors.onUserNotFound(e);
         } catch (GatewayException e) {
@@ -61,7 +62,20 @@ public final class LookupInteractor
         return friendship;
     }
 
-    private LookupDetails createNewLookupDetailsFrom(final UserFriendship friendshipDetails) {
-        return new LookupDetails(friendshipDetails.getUser().getId(),friendshipDetails.getFriendshipDate());
+    private LookupDetails createLookupDetailsResultFrom(final UserFriendship details) {
+        return details.onFriendship()
+                .map(f -> createOnFriendshipPresent(details, f))
+                .orElse(createOnFriendshipMissing(details));
+    }
+
+    private LookupDetails createOnFriendshipMissing(final UserFriendship details) {
+        return new LookupDetails(details.getUser().getId());
+    }
+
+    private LookupDetails createOnFriendshipPresent(final UserFriendship details, final Friendship friendship) {
+        return new LookupDetails(
+                details.getUser().getId(),
+                friendship.getIssueDate()
+        );
     }
 }
