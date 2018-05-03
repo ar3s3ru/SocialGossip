@@ -9,14 +9,18 @@ import socialgossip.server.core.gateways.friendship.UserFriendship;
 import socialgossip.server.core.gateways.session.GetSessionAccess;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.usecases.ProtectedUseCase;
+import socialgossip.server.usecases.logging.UseCaseLogger;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public final class LookupInteractor
         extends ProtectedUseCase<LookupUseCase.Input, LookupDetails, LookupErrors>
         implements LookupUseCase {
+
+    private static final Logger LOG = Logger.getLogger(LookupInteractor.class.getName());
 
     private final GetUserWithFriendshipAccess friendshipAccess;
 
@@ -51,7 +55,9 @@ public final class LookupInteractor
     private UserFriendship retrieveUserFriendshipDetails(final LookupUseCase.Input input,
                                                          final Session session)
             throws UserNotFoundException, GatewayException {
+        UseCaseLogger.fine(LOG, input, () -> "retrieving friendship info with " + input.getLookupUsername());
         final UserFriendship friendship = friendshipAccess.getUserWithFriendship(session, input.getLookupUsername());
+        UseCaseLogger.fine(LOG, input, () -> "query returned: " + friendship.toString());
         return friendship;
     }
 
