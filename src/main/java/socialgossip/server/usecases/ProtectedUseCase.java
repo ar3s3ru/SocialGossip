@@ -1,5 +1,6 @@
 package socialgossip.server.usecases;
 
+import socialgossip.server.core.entities.auth.Permission;
 import socialgossip.server.core.entities.auth.ProtectedResource;
 import socialgossip.server.core.entities.auth.UnauthorizedException;
 import socialgossip.server.core.entities.session.Session;
@@ -8,6 +9,7 @@ import socialgossip.server.core.gateways.session.GetSessionAccess;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends ProtectedErrorsHandler>
@@ -21,6 +23,15 @@ public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends Prot
     }
 
     protected abstract void onAuthorizedExecute(Session session, I input, Consumer<O> onSuccess, E errors);
+
+    @Override
+    public void checkAllowance(final Permission permission) throws UnauthorizedException {
+        Optional.ofNullable(permission).orElseThrow(
+                () -> new UnauthorizedException("<null>", "null tokens can't be authorized on logout")
+        ).getExpireDate().orElseThrow(
+                () -> new UnauthorizedException(permission.getToken(), "permission expired")
+        );
+    }
 
     @Override
     protected final void onExecute(I input, Consumer<O> onSuccess, E errors) {

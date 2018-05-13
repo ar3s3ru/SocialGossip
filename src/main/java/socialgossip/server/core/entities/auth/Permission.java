@@ -1,5 +1,8 @@
 package socialgossip.server.core.entities.auth;
 
+import java.util.Date;
+import java.util.Optional;
+
 /**
  * Represents a permission inside the application.
  *
@@ -18,4 +21,6 @@ public interface Permission {
      * @return the permission token.
      */
     String getToken();
+
+    Optional<Date> getExpireDate();
 }
