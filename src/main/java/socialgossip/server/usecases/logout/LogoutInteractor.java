@@ -1,7 +1,5 @@
 package socialgossip.server.usecases.logout;
 
-import socialgossip.server.core.entities.auth.Permission;
-import socialgossip.server.core.entities.auth.UnauthorizedException;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.notifications.Notifier;
@@ -13,7 +11,6 @@ import socialgossip.server.usecases.ProtectedUseCase;
 import socialgossip.server.usecases.logging.UseCaseLogger;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -41,16 +38,6 @@ public final class LogoutInteractor
         this.sessionAccess       = Objects.requireNonNull(removeSessionAccess);
         this.notifier            = Objects.requireNonNull(notifier);
         this.notificationFactory = Objects.requireNonNull(notificationFactory);
-    }
-
-    @Override
-    public void checkAllowance(final Permission permission) throws UnauthorizedException {
-        // We accept any type of Session here: this case, however, should never happen;
-        // if a null Session has been returned by the ProtectedUseCase code, it's probably
-        // a Gateway/Repository class problem.
-        Optional.ofNullable(permission).orElseThrow(
-                () -> new UnauthorizedException("<null>", "null tokens can't be authorized on logout")
-        );
     }
 
     @Override

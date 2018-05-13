@@ -1,7 +1,5 @@
 package socialgossip.server.usecases.lookup;
 
-import socialgossip.server.core.entities.auth.Permission;
-import socialgossip.server.core.entities.auth.UnauthorizedException;
 import socialgossip.server.core.entities.friendship.Friendship;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
@@ -13,7 +11,6 @@ import socialgossip.server.usecases.ProtectedUseCase;
 import socialgossip.server.usecases.logging.UseCaseLogger;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -29,13 +26,6 @@ public final class LookupInteractor
                             final GetSessionAccess            sessionAccess) {
         super(sessionAccess);
         this.friendshipAccess = Objects.requireNonNull(friendshipAccess);
-    }
-
-    @Override
-    public void checkAllowance(final Permission permission) throws UnauthorizedException {
-        Optional.ofNullable(permission).orElseThrow(
-                () -> new UnauthorizedException("<null>", "null tokens can't be authorized on logout")
-        );
     }
 
     @Override
