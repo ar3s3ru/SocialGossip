@@ -124,6 +124,13 @@ public final class LoginInteractor
     }
 
     private LoginOutput produceNewOutput(final Session session) {
-        return new LoginOutput(session.getToken(), session.getUser().getId(), session.getExpireDate());
+        // Session expireDate should be present
+        return new LoginOutput(
+                session.getToken(),
+                session.getUser().getId(),
+                session.getExpireDate().orElseThrow(
+                        () -> new RuntimeException("session must have expire date!")
+                )
+        );
     }
 }

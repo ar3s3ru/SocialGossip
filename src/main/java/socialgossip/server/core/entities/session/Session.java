@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -83,8 +84,8 @@ public class Session implements Permission {
         return user;
     }
 
-    public Date getExpireDate() {
-        return expireDate;
+    public Optional<Date> getExpireDate() {
+        return Optional.of(expireDate);
     }
 
     public InetAddress getIpAddress() {
