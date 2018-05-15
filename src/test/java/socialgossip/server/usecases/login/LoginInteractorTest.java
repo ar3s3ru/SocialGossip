@@ -7,9 +7,9 @@ import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.notifications.NotificationHandler;
 import socialgossip.server.core.gateways.notifications.Notifier;
-import socialgossip.server.core.gateways.session.AddSessionAccess;
+import socialgossip.server.core.gateways.session.SessionInserter;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
-import socialgossip.server.core.gateways.user.GetUserAccess;
+import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 
 import java.net.InetAddress;
@@ -22,16 +22,16 @@ import static org.mockito.Mockito.mock;
 public class LoginInteractorTest {
     @Test
     public void runWithNotExistentUser() {
-        final GetUserAccess userAccess = mock(GetUserAccess.class);
+        final UserFinder userAccess = mock(UserFinder.class);
         try {
-            doThrow(UserNotFoundException.class).when(userAccess).getByUsername("hello");
+            doThrow(UserNotFoundException.class).when(userAccess).findByUsername("hello");
         } catch (Exception e) {
             fail(e.getMessage());
         }
 
         final LoginInteractor interactor = new LoginInteractor(
                 userAccess,
-                mock(AddSessionAccess.class),
+                mock(SessionInserter.class),
                 mock(PasswordValidator.class),
                 mock(SessionFactory.class),
                 mock(Notifier.class)

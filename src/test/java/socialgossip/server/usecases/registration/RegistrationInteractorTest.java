@@ -8,7 +8,7 @@ import socialgossip.server.core.entities.password.PasswordValidator;
 import socialgossip.server.core.entities.user.InvalidUserException;
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.user.AddUserAccess;
+import socialgossip.server.core.gateways.user.UserInserter;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
 import socialgossip.server.dataproviders.InMemoryRepository;
 import socialgossip.server.security.BcryptSchema;
@@ -35,13 +35,13 @@ public class RegistrationInteractorTest {
 
     @Test(expected = NullPointerException.class)
     public void usingNullEncryptionSchema() {
-        final AddUserAccess userGateway = mock(AddUserAccess.class);
+        final UserInserter userGateway = mock(UserInserter.class);
         new RegistrationInteractor(User::new, userGateway, null, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void usingNullLocaleBuilder() {
-        final AddUserAccess userGateway = mock(AddUserAccess.class);
+        final UserInserter userGateway = mock(UserInserter.class);
         final EncryptionSchema encryptionSchema = mock(EncryptionSchema.class);
         new RegistrationInteractor(User::new, userGateway, encryptionSchema, null);
     }
@@ -49,7 +49,7 @@ public class RegistrationInteractorTest {
     @Test
     public void usingMockedConstructionArguments() {
         final UserFactory userFactory = mock(UserFactory.class);
-        final AddUserAccess userAccess = mock(AddUserAccess.class);
+        final UserInserter userAccess = mock(UserInserter.class);
         final EncryptionSchema encryptionSchema = mock(EncryptionSchema.class);
         final LocaleBuilderFactory localeBuilderFactory = mock(LocaleBuilderFactory.class);
         new RegistrationInteractor(userFactory, userAccess, encryptionSchema, localeBuilderFactory);
@@ -118,7 +118,7 @@ public class RegistrationInteractorTest {
         });
 
         try {
-            final User user = userAccess.getByUsername(input.getUsername());
+            final User user = userAccess.findByUsername(input.getUsername());
             assertEquals(input.getUsername(), user.getId());
             assertEquals(input.getLanguage(), user.getLang().getISO3Language());
             assertTrue(user.getPassword().verify(input.getPassword()));

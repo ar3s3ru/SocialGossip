@@ -7,9 +7,9 @@ import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.core.gateways.notifications.UnsupportedNotificationException;
-import socialgossip.server.core.gateways.session.AddSessionAccess;
+import socialgossip.server.core.gateways.session.SessionInserter;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
-import socialgossip.server.core.gateways.user.GetUserAccess;
+import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.usecases.AbstractUseCase;
 import socialgossip.server.usecases.logging.UseCaseLogger;
@@ -27,30 +27,30 @@ public final class LoginInteractor
 
     private final static Logger LOG = Logger.getLogger(LoginInteractor.class.getName());
 
-    private final GetUserAccess     userAccess;
-    private final AddSessionAccess  sessionAccess;
+    private final UserFinder userAccess;
+    private final SessionInserter   sessionInserter;
     private final PasswordValidator passwordValidator;
     private final SessionFactory    sessionFactory;
 
     private final Notifier                 notifier;
     private final LoginNotificationFactory notificationFactory;
 
-    public LoginInteractor(final GetUserAccess     userAccess,
-                           final AddSessionAccess  sessionAccess,
+    public LoginInteractor(final UserFinder userAccess,
+                           final SessionInserter   sessionInserter,
                            final PasswordValidator passwordValidator,
                            final SessionFactory    sessionFactory,
                            final Notifier          notifier) {
-        this(userAccess, sessionAccess, passwordValidator, sessionFactory, notifier, LoginNotification::new);
+        this(userAccess, sessionInserter, passwordValidator, sessionFactory, notifier, LoginNotification::new);
     }
 
-    public LoginInteractor(final GetUserAccess            userAccess,
-                           final AddSessionAccess         sessionAccess,
+    public LoginInteractor(final UserFinder userAccess,
+                           final SessionInserter          sessionInserter,
                            final PasswordValidator        passwordValidator,
                            final SessionFactory           sessionFactory,
                            final Notifier                 notifier,
                            final LoginNotificationFactory notificationFactory) {
         this.userAccess          = Objects.requireNonNull(userAccess);
-        this.sessionAccess       = Objects.requireNonNull(sessionAccess);
+        this.sessionInserter     = Objects.requireNonNull(sessionInserter);
         this.passwordValidator   = Objects.requireNonNull(passwordValidator);
         this.sessionFactory      = Objects.requireNonNull(sessionFactory);
         this.notifier            = Objects.requireNonNull(notifier);
@@ -83,7 +83,7 @@ public final class LoginInteractor
     private User retrieveUserByUsername(final LoginUseCase.Input input)
             throws UserNotFoundException, GatewayException {
         UseCaseLogger.fine(LOG, input, () -> "retrieving user: " + input.getUsername());
-        final User user = userAccess.getByUsername(input.getUsername());
+        final User user = userAccess.findByUsername(input.getUsername());
         UseCaseLogger.fine(LOG, input, () -> "retrieved user: " + user);
         return user;
     }
@@ -107,7 +107,7 @@ public final class LoginInteractor
         UseCaseLogger.info(LOG, input, () -> "produced new Session: " + session);
 
         UseCaseLogger.fine(LOG, input, () -> "writing to repository...");
-        sessionAccess.add(session);
+        sessionInserter.insert(session);
         UseCaseLogger.info(LOG, input, () -> "Session successfully added to repository");
         return session;
     }

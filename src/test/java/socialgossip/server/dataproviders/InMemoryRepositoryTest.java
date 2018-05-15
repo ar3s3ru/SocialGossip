@@ -23,7 +23,7 @@ public class InMemoryRepositoryTest {
             final HashMap<String, User> injectedUserMap = new HashMap<>();
             final InMemoryRepository repository = new InMemoryRepository(injectedUserMap, null);
             final User user = new User("hello", Locale.getDefault(), mock(Password.class));
-            repository.add(user);
+            repository.insert(user);
             assertEquals(user, injectedUserMap.get(user.getId()));
         } catch (Exception e) {
             fail(e.getMessage());
@@ -38,9 +38,9 @@ public class InMemoryRepositoryTest {
         User user;
         try {
             user = new User("hello", Locale.getDefault(), mock(Password.class));
-            repository.add(user);
+            repository.insert(user);
             try {
-                repository.add(user);
+                repository.insert(user);
             } catch (UserAlreadyExistsException ok) {} // Do nothing, should pass
         } catch (Exception e) {
             fail(e.getMessage());
@@ -53,8 +53,8 @@ public class InMemoryRepositoryTest {
             final InMemoryRepository repository = new InMemoryRepository();
             final User user = new User("hello", Locale.getDefault(), mock(Password.class));
 
-            repository.add(user);
-            assertEquals(user, repository.getByUsername(user.getId()));
+            repository.insert(user);
+            assertEquals(user, repository.findByUsername(user.getId()));
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -64,7 +64,7 @@ public class InMemoryRepositoryTest {
     public void retrieveNotExistentUserFailing() {
         try {
             final InMemoryRepository repository = new InMemoryRepository();
-            repository.getByUsername("hello");
+            repository.findByUsername("hello");
         } catch (UserNotFoundException ok) {}
     }
 
@@ -74,7 +74,7 @@ public class InMemoryRepositoryTest {
             final HashMap<String, Session> injectedSessionMap = new HashMap<>();
             final InMemoryRepository repository = new InMemoryRepository(null, injectedSessionMap);
             final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
-            repository.add(session);
+            repository.insert(session);
             assertEquals(session, injectedSessionMap.get(session.getToken()));
         } catch (Exception e) {
             fail(e.getMessage());
@@ -86,9 +86,9 @@ public class InMemoryRepositoryTest {
         try {
             final InMemoryRepository repository = new InMemoryRepository();
             final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
-            repository.add(session);
+            repository.insert(session);
             try {
-                repository.add(session);
+                repository.insert(session);
             } catch (SessionAlreadyExistsException ok) {}
         } catch (Exception e) {
             fail(e.getMessage());
@@ -100,8 +100,8 @@ public class InMemoryRepositoryTest {
         try {
             final InMemoryRepository repository = new InMemoryRepository();
             final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
-            repository.add(session);
-            assertEquals(session, repository.getByToken(session.getToken()));
+            repository.insert(session);
+            assertEquals(session, repository.findByToken(session.getToken()));
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -111,7 +111,7 @@ public class InMemoryRepositoryTest {
     public void retrieveNotExistentSessionFailing() {
         try {
             final InMemoryRepository repository = new InMemoryRepository();
-            repository.getByToken("");
+            repository.findByToken("");
         } catch (SessionNotFoundException ok) {}
     }
 }

@@ -4,8 +4,8 @@ import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.core.gateways.notifications.UnsupportedNotificationException;
-import socialgossip.server.core.gateways.session.GetSessionAccess;
-import socialgossip.server.core.gateways.session.RemoveSessionAccess;
+import socialgossip.server.core.gateways.session.SessionFinder;
+import socialgossip.server.core.gateways.session.SessionRemover;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
 import socialgossip.server.usecases.ProtectedUseCase;
 import socialgossip.server.usecases.logging.UseCaseLogger;
@@ -16,26 +16,26 @@ import java.util.logging.Logger;
 
 public final class LogoutInteractor
     extends ProtectedUseCase<LogoutUseCase.Input, Boolean, LogoutErrors>
-    implements LogoutUseCase {
+    implements LogoutUseCase<Boolean, LogoutErrors> {
 
     private static final Logger LOG = Logger.getLogger(LogoutInteractor.class.getName());
 
-    private final RemoveSessionAccess       sessionAccess;
+    private final SessionRemover            sessionRemover;
     private final Notifier                  notifier;
     private final LogoutNotificationFactory notificationFactory;
 
-    public LogoutInteractor(final GetSessionAccess    getSessionAccess,
-                            final RemoveSessionAccess removeSessionAccess,
+    public LogoutInteractor(final SessionFinder getSessionAccess,
+                            final SessionRemover removeSessionAccess,
                             final Notifier            notifier) {
         this(getSessionAccess, removeSessionAccess, notifier, LogoutNotification::new);
     }
 
-    public LogoutInteractor(final GetSessionAccess          getSessionAccess,
-                            final RemoveSessionAccess       removeSessionAccess,
+    public LogoutInteractor(final SessionFinder             sessionFinder,
+                            final SessionRemover            sessionRemover,
                             final Notifier                  notifier,
                             final LogoutNotificationFactory notificationFactory) {
-        super(getSessionAccess);
-        this.sessionAccess       = Objects.requireNonNull(removeSessionAccess);
+        super(sessionFinder);
+        this.sessionRemover      = Objects.requireNonNull(sessionRemover);
         this.notifier            = Objects.requireNonNull(notifier);
         this.notificationFactory = Objects.requireNonNull(notificationFactory);
     }
@@ -59,7 +59,7 @@ public final class LogoutInteractor
     private void tryRemovingSession(final LogoutUseCase.Input input, final Session session)
             throws SessionNotFoundException, GatewayException {
         UseCaseLogger.fine(LOG, input, () -> "removing Session \"" + session.getToken() + "\"...");
-        sessionAccess.remove(session);
+        sessionRemover.remove(session);
         UseCaseLogger.info(LOG, input, () -> "Session \"" + session.getToken() + "\" removed successfully!");
     }
 

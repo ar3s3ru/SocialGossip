@@ -7,7 +7,7 @@ import socialgossip.server.core.entities.password.Password;
 import socialgossip.server.core.entities.user.InvalidUserException;
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.user.AddUserAccess;
+import socialgossip.server.core.gateways.user.UserInserter;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
 import socialgossip.server.usecases.AbstractUseCase;
 import socialgossip.server.usecases.logging.UseCaseLogger;
@@ -22,12 +22,12 @@ import java.util.logging.Logger;
  * Implementation for the {@link RegistrationUseCase}.
  */
 public final class RegistrationInteractor
-        extends AbstractUseCase<RegistrationUseCase.Input, Boolean, RegistrationErrors>
-        implements RegistrationUseCase<Boolean, RegistrationErrors> {
+        extends AbstractUseCase<RegistrationUseCase.Input, Void, RegistrationErrors>
+        implements RegistrationUseCase<Void, RegistrationErrors> {
 
     private final static Logger LOG = Logger.getLogger(RegistrationInteractor.class.getName());
 
-    private final AddUserAccess        userGateway;
+    private final UserInserter userGateway;
     private final EncryptionSchema<?>  encryptionSchema;
     private final UserFactory          userFactory;
     private final LocaleBuilderFactory localeFactory;
@@ -38,9 +38,9 @@ public final class RegistrationInteractor
      * {@link Locale.Builder#Builder()} constructor as {@link LocaleBuilderFactory}.
      *
      * For more documentation, see {@link RegistrationInteractor#RegistrationInteractor(
-     * UserFactory, AddUserAccess, EncryptionSchema, LocaleBuilderFactory)}.
+     * UserFactory, UserInserter, EncryptionSchema, LocaleBuilderFactory)}.
      */
-    public RegistrationInteractor(final AddUserAccess       userGateway,
+    public RegistrationInteractor(final UserInserter userGateway,
                                   final EncryptionSchema<?> encryptionSchema) {
         this(User::new, userGateway, encryptionSchema, Locale.Builder::new);
     }
@@ -50,10 +50,10 @@ public final class RegistrationInteractor
      * {@link Locale.Builder} constructor as {@link LocaleBuilderFactory} result.
      *
      * For more documentation, see {@link RegistrationInteractor#RegistrationInteractor(
-     * UserFactory, AddUserAccess, EncryptionSchema, LocaleBuilderFactory)}.
+     * UserFactory, UserInserter, EncryptionSchema, LocaleBuilderFactory)}.
      */
     public RegistrationInteractor(final UserFactory         userFactory,
-                                  final AddUserAccess       userGateway,
+                                  final UserInserter userGateway,
                                   final EncryptionSchema<?> encryptionSchema) {
         this(userFactory, userGateway, encryptionSchema, Locale.Builder::new);
     }
@@ -62,13 +62,13 @@ public final class RegistrationInteractor
      * Creates a new instance of a {@link RegistrationInteractor}, that implements
      * the {@link RegistrationUseCase} logic.
      * @param userFactory is the factory object used to create new {@link User} objects.
-     * @param userGateway is the data access object used to add new {@link User} to the
+     * @param userGateway is the data access object used to insert new {@link User} to the
      *                    persistence layer of the application.
      * @param encryptionSchema is the encryption algorithm used to encrypt
      *                        the plain-text password chosen for the new {@link User}.
      */
     public RegistrationInteractor(final UserFactory          userFactory,
-                                  final AddUserAccess        userGateway,
+                                  final UserInserter userGateway,
                                   final EncryptionSchema<?>  encryptionSchema,
                                   final LocaleBuilderFactory localeBuilderFactory) {
         this.userGateway      = Objects.requireNonNull(userGateway);
@@ -79,13 +79,14 @@ public final class RegistrationInteractor
 
     @Override
     protected void onExecute(final RegistrationUseCase.Input input,
-                             final Consumer<Boolean>         onSuccess,
+                             final Consumer<Void>            onSuccess,
                              final RegistrationErrors        errors) {
         try {
             final Locale lang = produceLanguageLocale(input);
             final EncryptedPassword<?> password = produceEncryptedPassword(input);
             final User user = produceNewUser(input, lang, password);
-            onSuccess.accept(trySavingNewUser(input, user));
+            trySavingNewUser(input, user);
+            onSuccess.accept(null);
         } catch (IllformedLocaleException e) {
             UseCaseLogger.error(LOG, input, () -> "IllformedLocaleException: " + e.getMessage());
             errors.onInvalidLanguage(e);
@@ -127,12 +128,10 @@ public final class RegistrationInteractor
         return user;
     }
 
-    private boolean trySavingNewUser(final RegistrationUseCase.Input input,
-                                     final User newUser)
+    private void trySavingNewUser(final RegistrationUseCase.Input input, final User newUser)
             throws UserAlreadyExistsException, GatewayException {
         UseCaseLogger.fine(LOG, input, () -> "adding user to persistence layer...");
-        final boolean result = userGateway.add(newUser);
-        UseCaseLogger.info(LOG, input, () -> "User \"" + newUser.getId() + "\" add operation result: " + result);
-        return result;
+        userGateway.insert(newUser);
+        UseCaseLogger.info(LOG, input, () -> "User \"" + newUser.getId() + "\" insert successfully");
     }
 }

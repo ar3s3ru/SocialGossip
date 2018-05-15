@@ -31,9 +31,15 @@ public final class UseCaseLogger {
     }
 
     public static void error(final Logger logger,
-                            final UseCase.Input input,
-                            final Supplier<String> message) {
+                             final UseCase.Input input,
+                             final Supplier<String> message) {
         log(Level.SEVERE, logger, input.getRequestId(), message);
+    }
+
+    public static <E extends Exception> void exception(final Logger logger,
+                                                       final UseCase.Input input,
+                                                       final E exception) {
+        error(logger, input, () -> exception.getClass().getName() + ": " + exception);
     }
 
     private static void log(final Level logLevel,

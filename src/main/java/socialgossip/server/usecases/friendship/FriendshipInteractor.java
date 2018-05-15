@@ -58,10 +58,13 @@ public final class FriendshipInteractor
             sendFriendshipNotification(input, session, target);
             onSuccess.accept(produceFriendshipOutput(input, friendship));
         } catch (UserNotFoundException e) {
+            UseCaseLogger.error(LOG, input, () -> "UserNotFoundException: " + e);
             errors.onUserNotFound(e);
         } catch (InvalidFriendshipException e) {
+            UseCaseLogger.error(LOG, input, () -> "invalidFriendshipException: " + e);
             errors.onInvalidFriendship(e);
         } catch (FriendshipAlreadyExistsException e) {
+            UseCaseLogger.error(LOG, input, () -> "FriendshipAlreadyExistsException: " + e);
             errors.onFriendshipAlreadyExists(e);
         } catch (GatewayException e) {
             errors.onGatewayError(e);
@@ -70,21 +73,28 @@ public final class FriendshipInteractor
 
     private User getTargetUserFrom(final FriendshipUseCase.Input input)
             throws UserNotFoundException, GatewayException {
-        final User target = userAccess.getByUsername(input.getFriendUsername());
+        UseCaseLogger.fine(LOG, input, () -> "retrieving target friend: " + input.getFriendUsername());
+        final User target = userAccess.findByUsername(input.getFriendUsername());
+        UseCaseLogger.fine(LOG, input, () -> "found target User: " + target);
         return target;
     }
 
     private Friendship produceNewFriendship(final FriendshipUseCase.Input input,
                                             final User requester, final User target)
             throws InvalidFriendshipException {
+        UseCaseLogger.fine(LOG, input,
+                () -> "creating new friendship between" + requester.getId() + " and " + target.getId());
         final Friendship friendship = friendshipFactory.produce(requester, target);
+        UseCaseLogger.fine(LOG, input, () -> "Friendship created: " + friendship);
         return friendship;
     }
 
     private void trySavingFriendship(final FriendshipUseCase.Input input,
                                      final Friendship friendship)
             throws FriendshipAlreadyExistsException, GatewayException {
-        friendshipAccess.add(friendship);
+        UseCaseLogger.fine(LOG, input, () -> "saving Friendship: " + friendship);
+        friendshipInserter.insert(friendship);
+        UseCaseLogger.info(LOG, input, () -> "saved Friendship successfully: " + friendship);
     }
 
     private FriendshipOutput produceFriendshipOutput(final FriendshipUseCase.Input input,
@@ -97,9 +107,11 @@ public final class FriendshipInteractor
         try {
             final FriendshipNotification notification =
                     notificationFactory.produce(requester, target);
+            UseCaseLogger.fine(LOG, input, () -> "sending Friendship notification: " + notification);
             notifier.send(notification);
+            UseCaseLogger.info(LOG, input, () -> "Friendship notification sent: " + notification);
         } catch (UnsupportedNotificationException e) {
-            // TODO(ar3s3ru): add log-print
+            UseCaseLogger.warn(LOG, input, () -> "Friendship notification failed: " + e);
         }
     }
 }
