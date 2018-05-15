@@ -50,8 +50,10 @@ public final class LogoutInteractor
             trySendingLogoutNotification(input, session);
             onSuccess.accept(true);
         } catch (SessionNotFoundException e) {
+            UseCaseLogger.exception(LOG, input, e);
             errors.onSessionNotFound(e);
         } catch (GatewayException e) {
+            UseCaseLogger.exception(LOG, input, e);
             errors.onGatewayError(e);
         }
     }

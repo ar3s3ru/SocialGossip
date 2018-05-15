@@ -88,19 +88,19 @@ public final class RegistrationInteractor
             trySavingNewUser(input, user);
             onSuccess.accept(null);
         } catch (IllformedLocaleException e) {
-            UseCaseLogger.error(LOG, input, () -> "IllformedLocaleException: " + e.getMessage());
+            UseCaseLogger.exception(LOG, input, e);
             errors.onInvalidLanguage(e);
         } catch (InvalidPasswordException e) {
-            UseCaseLogger.error(LOG, input, () -> "InvalidPasswordException : " + e.getMessage());
+            UseCaseLogger.exception(LOG, input, e);
             errors.onInvalidPassword(e);
         } catch (InvalidUserException e) {
-            UseCaseLogger.error(LOG, input, () -> "InvalidUserException: " + e.getMessage());
+            UseCaseLogger.exception(LOG, input, e);
             errors.onInvalidUser(e);
         } catch (UserAlreadyExistsException e) {
-            UseCaseLogger.error(LOG, input, () -> "UserAlreadyExistsException: " + e.getMessage());
+            UseCaseLogger.exception(LOG, input, e);
             errors.onUserAlreadyExists(e);
         } catch (GatewayException e) {
-            UseCaseLogger.error(LOG, input, () -> "GatewayError: " + e.getMessage());
+            UseCaseLogger.exception(LOG, input, e);
             errors.onGatewayError(e);
         }
     }

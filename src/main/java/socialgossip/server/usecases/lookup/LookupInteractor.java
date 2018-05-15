@@ -37,8 +37,10 @@ public final class LookupInteractor
            final UserFriendship details = retrieveUserFriendshipDetails(input, session);
            onSuccess.accept(createLookupDetailsResultFrom(details));
         } catch (UserNotFoundException e) {
+            UseCaseLogger.exception(LOG, input, e);
             errors.onUserNotFound(e);
         } catch (GatewayException e) {
+            UseCaseLogger.exception(LOG, input, e);
             errors.onGatewayError(e);
         }
     }

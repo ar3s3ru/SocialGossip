@@ -66,16 +66,16 @@ public final class LoginInteractor
             tryRegisteringAndSendingLoginNotification(input, session);
             onSuccess.accept(produceNewOutput(session));
         } catch (UserNotFoundException e) {
-            UseCaseLogger.error(LOG, input, () -> "UserNotFoundException: " + e);
+            UseCaseLogger.exception(LOG, input, e);
             errors.onUserNotFound(e);
         } catch (InvalidPasswordException e) {
-            UseCaseLogger.error(LOG, input, () -> "InvalidPasswordException: " + e);
+            UseCaseLogger.exception(LOG, input, e);
             errors.onInvalidPassword(e);
         } catch (SessionAlreadyExistsException e) {
-            UseCaseLogger.error(LOG, input, () -> "SessionAlreadyExistsException: " + e);
+            UseCaseLogger.exception(LOG, input, e);
             errors.onSessionAlreadyExists(e);
         } catch (GatewayException e) {
-            UseCaseLogger.error(LOG, input, () -> "GatewayException: " + e);
+            UseCaseLogger.exception(LOG, input, e);
             errors.onGatewayError(e);
         }
     }
@@ -94,8 +94,7 @@ public final class LoginInteractor
         passwordValidator.validate(input.getPassword());
 
         UseCaseLogger.fine(LOG, input, () -> "check input password coherence with retrieved user...");
-        if (user.getPassword().verify(input.getPassword())) {
-            UseCaseLogger.error(LOG, input, () -> "passwords mismatch!");
+        if (!user.getPassword().verify(input.getPassword())) {
             throw new InvalidPasswordException(input.getPassword(), "passwords mismatch");
         }
         UseCaseLogger.fine(LOG, input, () -> "passwords match!");

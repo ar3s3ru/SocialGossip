@@ -85,7 +85,7 @@ public class RegistrationInteractorTest {
 
         Logger.getLogger(RegistrationInteractor.class.getName()).setLevel(Level.FINE);
         new RegistrationInteractor(userAccess, encryptionSchema)
-                .execute(input, Assert::assertTrue, new RegistrationErrors() {
+                .execute(input, Assert::assertNull, new RegistrationErrors() {
             @Override
             public void onInvalidLanguage(IllformedLocaleException e) {
                 fail(e.getMessage());

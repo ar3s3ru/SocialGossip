@@ -58,15 +58,16 @@ public final class FriendshipInteractor
             sendFriendshipNotification(input, session, target);
             onSuccess.accept(produceFriendshipOutput(input, friendship));
         } catch (UserNotFoundException e) {
-            UseCaseLogger.error(LOG, input, () -> "UserNotFoundException: " + e);
+            UseCaseLogger.exception(LOG, input, e);
             errors.onUserNotFound(e);
         } catch (InvalidFriendshipException e) {
-            UseCaseLogger.error(LOG, input, () -> "invalidFriendshipException: " + e);
+            UseCaseLogger.exception(LOG, input, e);
             errors.onInvalidFriendship(e);
         } catch (FriendshipAlreadyExistsException e) {
-            UseCaseLogger.error(LOG, input, () -> "FriendshipAlreadyExistsException: " + e);
+            UseCaseLogger.exception(LOG, input, e);
             errors.onFriendshipAlreadyExists(e);
         } catch (GatewayException e) {
+            UseCaseLogger.exception(LOG, input, e);
             errors.onGatewayError(e);
         }
     }
