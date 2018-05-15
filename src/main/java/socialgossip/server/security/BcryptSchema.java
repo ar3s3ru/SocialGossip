@@ -49,7 +49,7 @@ public class BcryptSchema extends EncryptionSchema<String> {
          * @return a {@link BcryptPassword} instance with hash and salt.
          */
         public static BcryptPassword from(String hash, String salt) {
-            // TODO(ar3s3ru): add a validation step.
+            // TODO(ar3s3ru): insert a validation step.
             return new BcryptPassword(hash, salt);
         }
 
