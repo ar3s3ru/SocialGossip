@@ -5,39 +5,43 @@ import socialgossip.server.core.entities.friendship.InvalidFriendshipException;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.friendship.AddFriendshipAccess;
+import socialgossip.server.core.gateways.friendship.FriendshipInserter;
 import socialgossip.server.core.gateways.friendship.FriendshipAlreadyExistsException;
 import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.core.gateways.notifications.UnsupportedNotificationException;
-import socialgossip.server.core.gateways.session.GetSessionAccess;
-import socialgossip.server.core.gateways.user.GetUserAccess;
+import socialgossip.server.core.gateways.session.SessionFinder;
+import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.usecases.ProtectedUseCase;
+import socialgossip.server.usecases.logging.UseCaseLogger;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public final class FriendshipInteractor
         extends ProtectedUseCase<FriendshipUseCase.Input, FriendshipOutput, FriendshipErrors>
-        implements FriendshipUseCase {
+        implements FriendshipUseCase<FriendshipOutput, FriendshipErrors> {
 
-    private final GetUserAccess       userAccess;
-    private final FriendshipFactory   friendshipFactory;
-    private final AddFriendshipAccess friendshipAccess;
+    private static final Logger LOG = Logger.getLogger(FriendshipInteractor.class.getName());
+
+    private final UserFinder userAccess;
+    private final FriendshipFactory  friendshipFactory;
+    private final FriendshipInserter friendshipInserter;
 
     private final Notifier                      notifier;
     private final FriendshipNotificationFactory notificationFactory;
 
-    public FriendshipInteractor(final GetSessionAccess sessionAccess,
-                                final GetUserAccess userAccess,
+    public FriendshipInteractor(final SessionFinder sessionFinder,
+                                final UserFinder userAccess,
                                 final FriendshipFactory friendshipFactory,
-                                final AddFriendshipAccess friendshipAccess,
+                                final FriendshipInserter friendshipInserter,
                                 final Notifier notifier,
                                 final FriendshipNotificationFactory notificationFactory) {
-        super(sessionAccess);
+        super(sessionFinder);
         this.userAccess          = Objects.requireNonNull(userAccess);
         this.friendshipFactory   = Objects.requireNonNull(friendshipFactory);
-        this.friendshipAccess    = Objects.requireNonNull(friendshipAccess);
+        this.friendshipInserter  = Objects.requireNonNull(friendshipInserter);
         this.notifier            = Objects.requireNonNull(notifier);
         this.notificationFactory = Objects.requireNonNull(notificationFactory);
     }

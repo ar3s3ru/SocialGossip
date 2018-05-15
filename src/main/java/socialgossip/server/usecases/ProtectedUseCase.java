@@ -5,7 +5,7 @@ import socialgossip.server.core.entities.auth.ProtectedResource;
 import socialgossip.server.core.entities.auth.UnauthorizedException;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.session.GetSessionAccess;
+import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
 
 import java.util.Objects;
@@ -16,10 +16,10 @@ public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends Prot
         extends AbstractUseCase<I, O, E>
         implements ProtectedResource {
 
-    protected final GetSessionAccess sessionAccess;
+    protected final SessionFinder sessionFinder;
 
-    protected ProtectedUseCase(final GetSessionAccess sessionAccess) {
-        this.sessionAccess = Objects.requireNonNull(sessionAccess);
+    protected ProtectedUseCase(final SessionFinder sessionAccess) {
+        this.sessionFinder = Objects.requireNonNull(sessionAccess);
     }
 
     protected abstract void onAuthorizedExecute(Session session, I input, Consumer<O> onSuccess, E errors);
@@ -36,7 +36,7 @@ public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends Prot
     @Override
     protected final void onExecute(I input, Consumer<O> onSuccess, E errors) {
         try {
-            final Session session = sessionAccess.getByToken(input.getSessionToken());
+            final Session session = sessionFinder.findByToken(input.getSessionToken());
             this.checkAllowance(session);
             this.onAuthorizedExecute(session, input, onSuccess, errors);
         } catch (GatewayException e) {
