@@ -2,12 +2,12 @@ package socialgossip.server.dataproviders;
 
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
-import socialgossip.server.core.gateways.session.AddSessionAccess;
-import socialgossip.server.core.gateways.session.GetSessionAccess;
+import socialgossip.server.core.gateways.session.SessionInserter;
+import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
-import socialgossip.server.core.gateways.user.AddUserAccess;
-import socialgossip.server.core.gateways.user.GetUserAccess;
+import socialgossip.server.core.gateways.user.UserInserter;
+import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 
@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class InMemoryRepository
-        implements AddUserAccess, GetUserAccess, AddSessionAccess, GetSessionAccess {
+        implements UserInserter, UserFinder, SessionInserter, SessionFinder {
 
     private final HashMap<String, User>    userMap;
     private final HashMap<String, Session> sessionMap;
@@ -32,18 +32,17 @@ public class InMemoryRepository
     }
 
     @Override
-    public boolean add(final User user) throws UserAlreadyExistsException {
+    public void insert(final User user) throws UserAlreadyExistsException {
         synchronized (userMap) {
             Objects.requireNonNull(user);
             if (Objects.nonNull(userMap.putIfAbsent(user.getId(), user))){
                 throw new UserAlreadyExistsException(user.getId());
             }
-            return true;
         }
     }
 
     @Override
-    public User getByUsername(final String username) throws UserNotFoundException {
+    public User findByUsername(final String username) throws UserNotFoundException {
         synchronized (userMap) {
             Objects.requireNonNull(username);
             return Optional.ofNullable(userMap.get(username))
@@ -52,7 +51,7 @@ public class InMemoryRepository
     }
 
     @Override
-    public void add(final Session session) throws SessionAlreadyExistsException {
+    public void insert(final Session session) throws SessionAlreadyExistsException {
         synchronized (sessionMap) {
             Objects.requireNonNull(session);
             if (Objects.nonNull(sessionMap.putIfAbsent(session.getToken(), session))) {
@@ -64,7 +63,7 @@ public class InMemoryRepository
     }
 
     @Override
-    public Session getByToken(final String token) throws SessionNotFoundException {
+    public Session findByToken(final String token) throws SessionNotFoundException {
         synchronized (sessionMap) {
             Objects.requireNonNull(token);
             return Optional.ofNullable(sessionMap.get(token))

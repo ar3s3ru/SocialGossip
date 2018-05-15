@@ -7,7 +7,7 @@ import socialgossip.server.core.gateways.GatewayException;
  * Represents a DAO that gives access to {@link Session} objects retrieval
  * by providing an identification, such as a token.
  */
-public interface GetSessionAccess {
+public interface SessionFinder {
     /**
      * Returns the {@link Session} object with the provided {@code token}.
      * @param token is the {@link Session} token to retrieve.
@@ -16,5 +16,5 @@ public interface GetSessionAccess {
      *         has been found.
      * @throws GatewayException if there's been an external error with the persistence layer.
      */
-    Session getByToken(String token) throws SessionNotFoundException, GatewayException;
+    Session findByToken(String token) throws SessionNotFoundException, GatewayException;
 }

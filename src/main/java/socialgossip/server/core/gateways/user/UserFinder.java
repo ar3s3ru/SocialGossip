@@ -7,7 +7,7 @@ import socialgossip.server.core.gateways.GatewayException;
  * Represents a DAO that gives ability to retrieve {@link User} objects by
  * a number of paramenters (username, etc.)
  */
-public interface GetUserAccess {
+public interface UserFinder {
     /**
      * Gets an {@link User} by its {@code username}, if exists.
      * @param username is the {@link User} name to retrieve.
@@ -15,5 +15,5 @@ public interface GetUserAccess {
      * @throws UserNotFoundException if no {@link User} with that {@code username} has been found.
      * @throws GatewayException if an external error with the persistence layer occurred.
      */
-    User getByUsername(String username) throws UserNotFoundException, GatewayException;
+    User findByUsername(String username) throws UserNotFoundException, GatewayException;
 }

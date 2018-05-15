@@ -4,10 +4,10 @@ import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
 
 /**
- * Represents a DAO that enables to add new {@link Session} objects to the
+ * Represents a DAO that enables to insert new {@link Session} objects to the
  * persistence storage layer.
  */
-public interface AddSessionAccess {
+public interface SessionInserter {
     /**
      * Adds a new {@link Session} to the persistence storage.
      *
@@ -15,10 +15,10 @@ public interface AddSessionAccess {
      * {@link socialgossip.server.core.entities.user.User} will be removed from the
      * persistence storage.
      *
-     * @param session is the {@link Session} to add.
+     * @param session is the {@link Session} to insert.
      * @throws SessionAlreadyExistsException if the {@link Session} token already exists.
      * @throws GatewayException if there's been an external error with the persistence layer,
      *         typically connection errors, etc.
      */
-    void add(Session session) throws SessionAlreadyExistsException, GatewayException;
+    void insert(Session session) throws SessionAlreadyExistsException, GatewayException;
 }
