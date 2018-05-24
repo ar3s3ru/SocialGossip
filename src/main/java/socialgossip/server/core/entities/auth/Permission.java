@@ -23,4 +23,6 @@ public interface Permission {
     String getToken();
 
     Optional<Date> getExpireDate();
+
+    boolean isExpired();
 }

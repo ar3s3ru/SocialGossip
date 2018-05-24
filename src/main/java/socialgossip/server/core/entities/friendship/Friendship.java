@@ -3,8 +3,10 @@ package socialgossip.server.core.entities.friendship;
 import socialgossip.server.core.entities.user.User;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Friendship {
     private final User[] subjects;
@@ -31,5 +33,11 @@ public class Friendship {
 
     public Date getIssueDate() {
         return issueDate;
+    }
+
+    public boolean involves(final User user1, final User user2) {
+        return Arrays.stream(subjects)
+                    .filter(u -> u.equals(user1) || u.equals(user2))
+                    .collect(Collectors.toSet()).size() == 2;
     }
 }

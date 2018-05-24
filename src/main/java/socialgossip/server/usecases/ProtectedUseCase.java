@@ -28,9 +28,10 @@ public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends Prot
     public void checkAllowance(final Permission permission) throws UnauthorizedException {
         Optional.ofNullable(permission).orElseThrow(
                 () -> new UnauthorizedException("<null>", "null tokens can't be authorized on logout")
-        ).getExpireDate().orElseThrow(
-                () -> new UnauthorizedException(permission.getToken(), "permission expired")
         );
+        if (permission.isExpired()) {
+            throw new UnauthorizedException(permission.getToken(), "permission expired");
+        }
     }
 
     @Override

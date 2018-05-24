@@ -76,27 +76,30 @@ public class Session implements Permission {
         this.ipAddress   = Objects.requireNonNull(ipAddress);
     }
 
+    @Override
     public String getToken() {
         return token;
     }
 
-    public User getUser() {
-        return user;
-    }
-
+    @Override
     public Optional<Date> getExpireDate() {
         return Optional.of(expireDate);
-    }
-
-    public InetAddress getIpAddress() {
-        return ipAddress;
     }
 
     /**
      * Checks if the {@link Session} is already expired.
      * @return true if the {@link Session} is expired, false otherwise.
      */
+    @Override
     public boolean isExpired() {
         return expireDate.toInstant().isBefore(Instant.now());
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public InetAddress getIpAddress() {
+        return ipAddress;
     }
 }
