@@ -8,7 +8,7 @@ import socialgossip.server.core.gateways.friendship.FriendshipsLister;
 import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.usecases.ProtectedUseCase;
 import socialgossip.server.usecases.friendship.FriendshipOutput;
-import socialgossip.server.usecases.logging.UseCaseLogger;
+import socialgossip.server.logging.AppLogger;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -38,7 +38,7 @@ public final class FriendsInteractor
             final List<Friendship> friendships = retrieveFriendshipsOf(input, session.getUser());
             onSuccess.accept(produceFriendshipsOutput(input, session.getUser(), friendships));
         } catch (GatewayException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onGatewayError(e);
         }
     }
@@ -46,9 +46,9 @@ public final class FriendsInteractor
     private List<Friendship> retrieveFriendshipsOf(final FriendsUseCase.Input input,
                                                    final User user)
             throws GatewayException {
-        UseCaseLogger.fine(LOG, input, () -> "retrieving friends for User " + user);
+        AppLogger.fine(LOG, input::getRequestId, () -> "retrieving friends for User " + user);
         final List<Friendship> friendships = friendshipsLister.listFriendsOf(user);
-        UseCaseLogger.fine(LOG, input, () -> "friendships retrieved: " + friendships);
+        AppLogger.fine(LOG, input::getRequestId, () -> "friendships retrieved: " + friendships);
         return friendships;
     }
 
@@ -56,14 +56,14 @@ public final class FriendsInteractor
                                                             final User requester,
                                                             final List<Friendship> friendships) {
         final List<Friendship> from = Optional.ofNullable(friendships).orElseGet(Collections::emptyList);
-        UseCaseLogger.fine(LOG, input, () -> "producing output from friendships: " + from);
+        AppLogger.fine(LOG, input::getRequestId, () -> "producing output from friendships: " + from);
         final List<FriendshipOutput> output = friendships.stream().map(friendship -> {
             final User[] users = friendship.getSubjects();
             final User friend = Arrays.stream(users).filter(u -> !u.equals(requester)).findFirst().get();
-            UseCaseLogger.fine(LOG, input, () -> "adding User to friends list: " + friend);
+            AppLogger.fine(LOG, input::getRequestId, () -> "adding User to friends list: " + friend);
             return new FriendshipOutput(friend.getId(), friendship.getIssueDate());
         }).collect(Collectors.toList());
-        UseCaseLogger.fine(LOG, input, () -> "output produced: " + output);
+        AppLogger.fine(LOG, input::getRequestId, () -> "output produced: " + output);
         return output;
     }
 }

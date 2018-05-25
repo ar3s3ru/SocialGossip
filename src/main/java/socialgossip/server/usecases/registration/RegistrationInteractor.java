@@ -10,7 +10,7 @@ import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.user.UserInserter;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
 import socialgossip.server.usecases.AbstractUseCase;
-import socialgossip.server.usecases.logging.UseCaseLogger;
+import socialgossip.server.logging.AppLogger;
 
 import java.util.IllformedLocaleException;
 import java.util.Locale;
@@ -27,7 +27,7 @@ public final class RegistrationInteractor
 
     private final static Logger LOG = Logger.getLogger(RegistrationInteractor.class.getName());
 
-    private final UserInserter userGateway;
+    private final UserInserter         inserter;
     private final EncryptionSchema<?>  encryptionSchema;
     private final UserFactory          userFactory;
     private final LocaleBuilderFactory localeFactory;
@@ -40,9 +40,9 @@ public final class RegistrationInteractor
      * For more documentation, see {@link RegistrationInteractor#RegistrationInteractor(
      * UserFactory, UserInserter, EncryptionSchema, LocaleBuilderFactory)}.
      */
-    public RegistrationInteractor(final UserInserter userGateway,
+    public RegistrationInteractor(final UserInserter        inserter,
                                   final EncryptionSchema<?> encryptionSchema) {
-        this(User::new, userGateway, encryptionSchema, Locale.Builder::new);
+        this(User::new, inserter, encryptionSchema, Locale.Builder::new);
     }
 
     /**
@@ -53,25 +53,25 @@ public final class RegistrationInteractor
      * UserFactory, UserInserter, EncryptionSchema, LocaleBuilderFactory)}.
      */
     public RegistrationInteractor(final UserFactory         userFactory,
-                                  final UserInserter userGateway,
+                                  final UserInserter        inserter,
                                   final EncryptionSchema<?> encryptionSchema) {
-        this(userFactory, userGateway, encryptionSchema, Locale.Builder::new);
+        this(userFactory, inserter, encryptionSchema, Locale.Builder::new);
     }
 
     /**
      * Creates a new instance of a {@link RegistrationInteractor}, that implements
      * the {@link RegistrationUseCase} logic.
      * @param userFactory is the factory object used to create new {@link User} objects.
-     * @param userGateway is the data access object used to insert new {@link User} to the
+     * @param inserter is the data access object used to insert new {@link User} to the
      *                    persistence layer of the application.
      * @param encryptionSchema is the encryption algorithm used to encrypt
      *                        the plain-text password chosen for the new {@link User}.
      */
     public RegistrationInteractor(final UserFactory          userFactory,
-                                  final UserInserter userGateway,
+                                  final UserInserter         inserter,
                                   final EncryptionSchema<?>  encryptionSchema,
                                   final LocaleBuilderFactory localeBuilderFactory) {
-        this.userGateway      = Objects.requireNonNull(userGateway);
+        this.inserter         = Objects.requireNonNull(inserter);
         this.encryptionSchema = Objects.requireNonNull(encryptionSchema);
         this.userFactory      = Objects.requireNonNull(userFactory);
         this.localeFactory    = Objects.requireNonNull(localeBuilderFactory);
@@ -88,19 +88,19 @@ public final class RegistrationInteractor
             trySavingNewUser(input, user);
             onSuccess.accept(null);
         } catch (IllformedLocaleException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onInvalidLanguage(e);
         } catch (InvalidPasswordException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onInvalidPassword(e);
         } catch (InvalidUserException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onInvalidUser(e);
         } catch (UserAlreadyExistsException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onUserAlreadyExists(e);
         } catch (GatewayException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onGatewayError(e);
         }
     }
@@ -108,14 +108,14 @@ public final class RegistrationInteractor
     private Locale produceLanguageLocale(final RegistrationUseCase.Input input)
             throws IllformedLocaleException {
         final Locale lang = localeFactory.produce().setLanguageTag(input.getLanguage()).build();
-        UseCaseLogger.fine(LOG, input, () -> "produced new language: " + input.getLanguage());
+        AppLogger.fine(LOG, input::getRequestId, () -> "produced new language: " + input.getLanguage());
         return lang;
     }
 
     private EncryptedPassword<?> produceEncryptedPassword(final RegistrationUseCase.Input input)
             throws InvalidPasswordException {
         final EncryptedPassword<?> password = encryptionSchema.from(input.getPassword());
-        UseCaseLogger.fine(LOG, input, () -> "encrypted password successfully");
+        AppLogger.fine(LOG, input::getRequestId, () -> "encrypted password successfully");
         return password;
     }
 
@@ -124,14 +124,14 @@ public final class RegistrationInteractor
                                 final EncryptedPassword<?>      password)
             throws InvalidUserException {
         final User user = userFactory.produce(input.getUsername(), lang, password);
-        UseCaseLogger.fine(LOG, input, () -> "produced new User: " + user);
+        AppLogger.fine(LOG, input::getRequestId, () -> "produced new User: " + user);
         return user;
     }
 
     private void trySavingNewUser(final RegistrationUseCase.Input input, final User newUser)
             throws UserAlreadyExistsException, GatewayException {
-        UseCaseLogger.fine(LOG, input, () -> "adding user to persistence layer...");
-        userGateway.insert(newUser);
-        UseCaseLogger.info(LOG, input, () -> "User \"" + newUser.getId() + "\" insert successfully");
+        AppLogger.fine(LOG, input::getRequestId, () -> "adding user to persistence layer...");
+        inserter.insert(newUser);
+        AppLogger.info(LOG, input::getRequestId, () -> "User \"" + newUser.getId() + "\" insert successfully");
     }
 }

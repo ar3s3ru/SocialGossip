@@ -8,7 +8,7 @@ import socialgossip.server.core.gateways.friendship.UserFriendship;
 import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.usecases.ProtectedUseCase;
-import socialgossip.server.usecases.logging.UseCaseLogger;
+import socialgossip.server.logging.AppLogger;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -37,10 +37,10 @@ public final class LookupInteractor
            final UserFriendship details = retrieveUserFriendshipDetails(input, session);
            onSuccess.accept(createLookupDetailsResultFrom(details));
         } catch (UserNotFoundException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onUserNotFound(e);
         } catch (GatewayException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onGatewayError(e);
         }
     }
@@ -48,9 +48,9 @@ public final class LookupInteractor
     private UserFriendship retrieveUserFriendshipDetails(final LookupUseCase.Input input,
                                                          final Session session)
             throws UserNotFoundException, GatewayException {
-        UseCaseLogger.fine(LOG, input, () -> "retrieving friendship info with " + input.getLookupUsername());
+        AppLogger.fine(LOG, input::getRequestId, () -> "retrieving friendship info with " + input.getLookupUsername());
         final UserFriendship friendship = friendshipFinder.findUserFriendshipBetween(session, input.getLookupUsername());
-        UseCaseLogger.fine(LOG, input, () -> "query returned: " + friendship.toString());
+        AppLogger.fine(LOG, input::getRequestId, () -> "query returned: " + friendship.toString());
         return friendship;
     }
 

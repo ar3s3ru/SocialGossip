@@ -12,7 +12,7 @@ import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.usecases.AbstractUseCase;
-import socialgossip.server.usecases.logging.UseCaseLogger;
+import socialgossip.server.logging.AppLogger;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -27,7 +27,7 @@ public final class LoginInteractor
 
     private final static Logger LOG = Logger.getLogger(LoginInteractor.class.getName());
 
-    private final UserFinder userAccess;
+    private final UserFinder        userFinder;
     private final SessionInserter   sessionInserter;
     private final PasswordValidator passwordValidator;
     private final SessionFactory    sessionFactory;
@@ -35,21 +35,21 @@ public final class LoginInteractor
     private final Notifier                 notifier;
     private final LoginNotificationFactory notificationFactory;
 
-    public LoginInteractor(final UserFinder userAccess,
+    public LoginInteractor(final UserFinder        userFinder,
                            final SessionInserter   sessionInserter,
                            final PasswordValidator passwordValidator,
                            final SessionFactory    sessionFactory,
                            final Notifier          notifier) {
-        this(userAccess, sessionInserter, passwordValidator, sessionFactory, notifier, LoginNotification::new);
+        this(userFinder, sessionInserter, passwordValidator, sessionFactory, notifier, LoginNotification::new);
     }
 
-    public LoginInteractor(final UserFinder userAccess,
+    public LoginInteractor(final UserFinder               userFinder,
                            final SessionInserter          sessionInserter,
                            final PasswordValidator        passwordValidator,
                            final SessionFactory           sessionFactory,
                            final Notifier                 notifier,
                            final LoginNotificationFactory notificationFactory) {
-        this.userAccess          = Objects.requireNonNull(userAccess);
+        this.userFinder          = Objects.requireNonNull(userFinder);
         this.sessionInserter     = Objects.requireNonNull(sessionInserter);
         this.passwordValidator   = Objects.requireNonNull(passwordValidator);
         this.sessionFactory      = Objects.requireNonNull(sessionFactory);
@@ -66,59 +66,59 @@ public final class LoginInteractor
             tryRegisteringAndSendingLoginNotification(input, session);
             onSuccess.accept(produceNewOutput(session));
         } catch (UserNotFoundException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onUserNotFound(e);
         } catch (InvalidPasswordException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onInvalidPassword(e);
         } catch (SessionAlreadyExistsException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onSessionAlreadyExists(e);
         } catch (GatewayException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onGatewayError(e);
         }
     }
 
     private User retrieveUserByUsername(final LoginUseCase.Input input)
             throws UserNotFoundException, GatewayException {
-        UseCaseLogger.fine(LOG, input, () -> "retrieving user: " + input.getUsername());
-        final User user = userAccess.findByUsername(input.getUsername());
-        UseCaseLogger.fine(LOG, input, () -> "retrieved user: " + user);
+        AppLogger.fine(LOG, input::getRequestId, () -> "retrieving user: " + input.getUsername());
+        final User user = userFinder.findByUsername(input.getUsername());
+        AppLogger.fine(LOG, input::getRequestId, () -> "retrieved user: " + user);
         return user;
     }
 
     private void validateInputPassword(final LoginUseCase.Input input, final User user)
             throws InvalidPasswordException {
-        UseCaseLogger.fine(LOG, input, () -> "validating input password format...");
+        AppLogger.fine(LOG, input::getRequestId, () -> "validating input password format...");
         passwordValidator.validate(input.getPassword());
 
-        UseCaseLogger.fine(LOG, input, () -> "check input password coherence with retrieved user...");
+        AppLogger.fine(LOG, input::getRequestId, () -> "check input password coherence with retrieved user...");
         if (!user.getPassword().verify(input.getPassword())) {
             throw new InvalidPasswordException(input.getPassword(), "passwords mismatch");
         }
-        UseCaseLogger.fine(LOG, input, () -> "passwords match!");
+        AppLogger.fine(LOG, input::getRequestId, () -> "passwords match!");
     }
 
     private Session createAndAddNewSession(final LoginUseCase.Input input, final User user)
             throws SessionAlreadyExistsException, GatewayException{
         final Session session = sessionFactory.produce(user, input.getIpAddress());
-        UseCaseLogger.info(LOG, input, () -> "produced new Session: " + session);
+        AppLogger.info(LOG, input::getRequestId, () -> "produced new Session: " + session);
 
-        UseCaseLogger.fine(LOG, input, () -> "writing to repository...");
+        AppLogger.fine(LOG, input::getRequestId, () -> "writing to repository...");
         sessionInserter.insert(session);
-        UseCaseLogger.info(LOG, input, () -> "Session successfully added to repository");
+        AppLogger.info(LOG, input::getRequestId, () -> "Session successfully added to repository");
         return session;
     }
 
     private void tryRegisteringAndSendingLoginNotification(final LoginUseCase.Input input, final Session session) {
         try {
-            UseCaseLogger.fine(LOG, input, () -> "registering Friendships notification handler...");
+            AppLogger.fine(LOG, input::getRequestId, () -> "registering Friendships notification handler...");
             notifier.register(input.getFriendshipsHandler().apply(session));
-            UseCaseLogger.fine(LOG, input, () -> "sending login notification...");
+            AppLogger.fine(LOG, input::getRequestId, () -> "sending login notification...");
             notifier.send(notificationFactory.produce(session));
         } catch (UnsupportedNotificationException e) {
-            UseCaseLogger.warn(LOG, input, () -> "UnsupportedNotificationException: " + e.getMessage());
+            AppLogger.warn(LOG, input::getRequestId, () -> "UnsupportedNotificationException: " + e.getMessage());
         }
     }
 

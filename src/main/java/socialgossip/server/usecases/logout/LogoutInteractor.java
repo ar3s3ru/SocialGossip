@@ -8,7 +8,7 @@ import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.session.SessionRemover;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
 import socialgossip.server.usecases.ProtectedUseCase;
-import socialgossip.server.usecases.logging.UseCaseLogger;
+import socialgossip.server.logging.AppLogger;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -50,32 +50,32 @@ public final class LogoutInteractor
             trySendingLogoutNotification(input, session);
             onSuccess.accept(true);
         } catch (SessionNotFoundException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onSessionNotFound(e);
         } catch (GatewayException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onGatewayError(e);
         }
     }
 
     private void tryRemovingSession(final LogoutUseCase.Input input, final Session session)
             throws SessionNotFoundException, GatewayException {
-        UseCaseLogger.fine(LOG, input, () -> "removing Session \"" + session.getToken() + "\"...");
+        AppLogger.fine(LOG, input::getRequestId, () -> "removing Session \"" + session.getToken() + "\"...");
         sessionRemover.remove(session);
-        UseCaseLogger.info(LOG, input, () -> "Session \"" + session.getToken() + "\" removed successfully!");
+        AppLogger.info(LOG, input::getRequestId, () -> "Session \"" + session.getToken() + "\" removed successfully!");
     }
 
     private void trySendingLogoutNotification(final LogoutUseCase.Input input, final Session session) {
         final LogoutNotification notification = notificationFactory.produce(session);
         try {
-            UseCaseLogger.fine(LOG, input, () -> "sending logout notification...");
+            AppLogger.fine(LOG, input::getRequestId, () -> "sending logout notification...");
             notifier.send(notification);
-            UseCaseLogger.fine(LOG, input, () -> "logout notification successfully delivered!");
+            AppLogger.fine(LOG, input::getRequestId, () -> "logout notification successfully delivered!");
         } catch (UnsupportedNotificationException e) {
-            UseCaseLogger.warn(LOG, input, () -> "UnsupportedNotificationException: " + e);
+            AppLogger.warn(LOG, input::getRequestId, () -> "UnsupportedNotificationException: " + e);
         }
         notifier.unregister(notification); // LogoutNotification is Session-scoped!
-        UseCaseLogger.fine(LOG, input,
+        AppLogger.fine(LOG, input::getRequestId,
                 () -> "unregistered notification handlers for Session \"" + session.getToken() + "\""
         );
     }

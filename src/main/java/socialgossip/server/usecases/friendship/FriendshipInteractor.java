@@ -13,7 +13,7 @@ import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 import socialgossip.server.usecases.ProtectedUseCase;
-import socialgossip.server.usecases.logging.UseCaseLogger;
+import socialgossip.server.logging.AppLogger;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -25,21 +25,21 @@ public final class FriendshipInteractor
 
     private static final Logger LOG = Logger.getLogger(FriendshipInteractor.class.getName());
 
-    private final UserFinder userAccess;
+    private final UserFinder userFinder;
     private final FriendshipFactory  friendshipFactory;
     private final FriendshipInserter friendshipInserter;
 
     private final Notifier                      notifier;
     private final FriendshipNotificationFactory notificationFactory;
 
-    public FriendshipInteractor(final SessionFinder sessionFinder,
-                                final UserFinder userAccess,
-                                final FriendshipFactory friendshipFactory,
-                                final FriendshipInserter friendshipInserter,
-                                final Notifier notifier,
+    public FriendshipInteractor(final SessionFinder                 sessionFinder,
+                                final UserFinder                    userFinder,
+                                final FriendshipFactory             friendshipFactory,
+                                final FriendshipInserter            friendshipInserter,
+                                final Notifier                      notifier,
                                 final FriendshipNotificationFactory notificationFactory) {
         super(sessionFinder);
-        this.userAccess          = Objects.requireNonNull(userAccess);
+        this.userFinder          = Objects.requireNonNull(userFinder);
         this.friendshipFactory   = Objects.requireNonNull(friendshipFactory);
         this.friendshipInserter  = Objects.requireNonNull(friendshipInserter);
         this.notifier            = Objects.requireNonNull(notifier);
@@ -58,44 +58,44 @@ public final class FriendshipInteractor
             sendFriendshipNotification(input, session, target);
             onSuccess.accept(produceFriendshipOutput(input, friendship));
         } catch (UserNotFoundException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onUserNotFound(e);
         } catch (InvalidFriendshipException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onInvalidFriendship(e);
         } catch (FriendshipAlreadyExistsException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onFriendshipAlreadyExists(e);
         } catch (GatewayException e) {
-            UseCaseLogger.exception(LOG, input, e);
+            AppLogger.exception(LOG, input::getRequestId, e);
             errors.onGatewayError(e);
         }
     }
 
     private User getTargetUserFrom(final FriendshipUseCase.Input input)
             throws UserNotFoundException, GatewayException {
-        UseCaseLogger.fine(LOG, input, () -> "retrieving target friend: " + input.getFriendUsername());
-        final User target = userAccess.findByUsername(input.getFriendUsername());
-        UseCaseLogger.fine(LOG, input, () -> "found target User: " + target);
+        AppLogger.fine(LOG, input::getRequestId, () -> "retrieving target friend: " + input.getFriendUsername());
+        final User target = userFinder.findByUsername(input.getFriendUsername());
+        AppLogger.fine(LOG, input::getRequestId, () -> "found target User: " + target);
         return target;
     }
 
     private Friendship produceNewFriendship(final FriendshipUseCase.Input input,
                                             final User requester, final User target)
             throws InvalidFriendshipException {
-        UseCaseLogger.fine(LOG, input,
+        AppLogger.fine(LOG, input::getRequestId,
                 () -> "creating new friendship between" + requester.getId() + " and " + target.getId());
         final Friendship friendship = friendshipFactory.produce(requester, target);
-        UseCaseLogger.fine(LOG, input, () -> "Friendship created: " + friendship);
+        AppLogger.fine(LOG, input::getRequestId, () -> "Friendship created: " + friendship);
         return friendship;
     }
 
     private void trySavingFriendship(final FriendshipUseCase.Input input,
                                      final Friendship friendship)
             throws FriendshipAlreadyExistsException, GatewayException {
-        UseCaseLogger.fine(LOG, input, () -> "saving Friendship: " + friendship);
+        AppLogger.fine(LOG, input::getRequestId, () -> "saving Friendship: " + friendship);
         friendshipInserter.insert(friendship);
-        UseCaseLogger.info(LOG, input, () -> "saved Friendship successfully: " + friendship);
+        AppLogger.info(LOG, input::getRequestId, () -> "saved Friendship successfully: " + friendship);
     }
 
     private FriendshipOutput produceFriendshipOutput(final FriendshipUseCase.Input input,
@@ -108,11 +108,11 @@ public final class FriendshipInteractor
         try {
             final FriendshipNotification notification =
                     notificationFactory.produce(requester, target);
-            UseCaseLogger.fine(LOG, input, () -> "sending Friendship notification: " + notification);
+            AppLogger.fine(LOG, input::getRequestId, () -> "sending Friendship notification: " + notification);
             notifier.send(notification);
-            UseCaseLogger.info(LOG, input, () -> "Friendship notification sent: " + notification);
+            AppLogger.info(LOG, input::getRequestId, () -> "Friendship notification sent: " + notification);
         } catch (UnsupportedNotificationException e) {
-            UseCaseLogger.warn(LOG, input, () -> "Friendship notification failed: " + e);
+            AppLogger.warn(LOG, input::getRequestId, () -> "Friendship notification failed: " + e);
         }
     }
 }
