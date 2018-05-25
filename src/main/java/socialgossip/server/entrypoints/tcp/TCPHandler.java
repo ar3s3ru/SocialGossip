@@ -23,16 +23,20 @@ final class TCPHandler implements Runnable {
                 final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))
         ) {
             while (!socket.isClosed()) {
-                final String opcode  = reader.readLine();
-                final Controller controller = controllersMap.get(opcode);
-                if (Objects.isNull(controller)) {
-                    // TODO: write an error message to the user
-                    writer.write("invalid op requested");
+                try {
+                    final String opcode  = reader.readLine();
+                    final Controller controller = controllersMap.get(opcode);
+                    if (Objects.isNull(controller)) {
+                        // TODO: write an error message to the user
+                        writer.write("invalid op requested");
+                        continue;
+                    }
+                    final String request = reader.readLine();
+                    controller.handle(requestId, request, writer);
+                } finally {
+                    writer.newLine();
+                    writer.flush();
                 }
-                final String request = reader.readLine();
-                controller.handle(requestId, request, writer);
-                writer.newLine();
-                writer.flush();
             }
         } catch (IOException e) {
             // TODO: reading or writing went wrong
