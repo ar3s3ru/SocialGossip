@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 @FunctionalInterface
-public interface IOConsumerWrapper<T> extends Consumer<T> {
+public interface IOConsumer<T> extends Consumer<T> {
     default void accept(final T elem) {
         try {
             acceptThrows(elem);
         } catch (IOException e) {
-            
+            // Log here or something
         }
     }
 
