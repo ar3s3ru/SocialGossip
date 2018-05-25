@@ -4,6 +4,7 @@ import socialgossip.server.core.entities.password.EncryptionSchema;
 import socialgossip.server.dataproviders.InMemoryRepository;
 import socialgossip.server.entrypoints.tcp.TCPServer;
 import socialgossip.server.entrypoints.tcp.registration.RegistrationController;
+import socialgossip.server.logging.AppLogger;
 import socialgossip.server.presentation.registration.RegistrationPresenter;
 import socialgossip.server.security.BcryptSchema;
 import socialgossip.server.security.SimplePasswordValidator;
@@ -32,6 +33,7 @@ public class Application {
 
         Logger.getLogger(RegistrationInteractor.class.getName()).setLevel(Level.ALL);
 
+        AppLogger.info(Logger.getGlobal(), null, () -> "starting TCP server...");
         final Future future = executor.submit(server);
         try {
             future.get();

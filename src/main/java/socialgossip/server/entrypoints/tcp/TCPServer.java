@@ -1,5 +1,7 @@
 package socialgossip.server.entrypoints.tcp;
 
+import socialgossip.server.logging.AppLogger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,13 +12,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 public final class TCPServer implements Runnable {
+    private static final Logger LOG = Logger.getLogger(TCPServer.class.getName());
+
     private final Map<String, Controller> controllersMap = new HashMap<>();
     private final AtomicInteger           requestCounter = new AtomicInteger();
 
-    private final String serverName;
-    private final int serverPort;
+    private final String             serverName;
+    private final int                serverPort;
     private final ThreadPoolExecutor executor;
 
     private volatile boolean keepRunning;
@@ -45,7 +50,9 @@ public final class TCPServer implements Runnable {
 
     public void registerController(final String opcode, final Controller controller) {
         synchronized (controllersMap) {
-            controllersMap.put(validatedOpcode(opcode), Objects.requireNonNull(controller));
+            final String code = validatedOpcode(opcode);
+            AppLogger.fine(LOG, () -> serverName, () -> "registering opcode: " + code);
+            controllersMap.put(code, Objects.requireNonNull(controller));
         }
     }
 
@@ -55,23 +62,22 @@ public final class TCPServer implements Runnable {
 
     @Override
     public void run() {
+        AppLogger.info(LOG, () -> serverName, () -> "listening on port " + serverPort);
         try (final ServerSocket welcomeSocket = new ServerSocket(serverPort)) {
             while (keepRunning) {
+                // Pre-generate next request id
+                final String requestId = generateRequestId(serverName, requestCounter.addAndGet(1));
                 try {
                     final Socket acceptedSocket = welcomeSocket.accept();
                     acceptedSocket.setKeepAlive(true);
                     final Future future = executor.submit(
-                            new TCPHandler(
-                                    generateRequestId(serverName, requestCounter.addAndGet(1)),
-                                    acceptedSocket,
-                                    controllersMap
-                            )
+                            new TCPHandler(requestId, acceptedSocket, controllersMap)
                     );
                     future.get();
                 } catch (IOException e) {
-                    // TODO: can't accept connection
+                    AppLogger.warn(LOG, () -> requestId, () -> "can't accept connection: " + e);
                 } catch (InterruptedException | ExecutionException e) {
-
+                    AppLogger.warn(LOG, () -> requestId, () -> "request interrupted: " + e);
                 }
             }
         } catch (IOException e) {
