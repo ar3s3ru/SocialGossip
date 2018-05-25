@@ -26,7 +26,7 @@ public final class TCPServer implements Runnable {
 
     private volatile boolean keepRunning;
 
-    private static String generateRequestId(final String name, final int count) {
+    private static String generateConnectionId(final String name, final int count) {
         return name + "/" + count;
     }
 
@@ -65,25 +65,26 @@ public final class TCPServer implements Runnable {
         AppLogger.info(LOG, () -> serverName, () -> "listening on port " + serverPort);
         try (final ServerSocket welcomeSocket = new ServerSocket(serverPort)) {
             while (keepRunning) {
-                // Pre-generate next request id
-                final String requestId = generateRequestId(serverName, requestCounter.addAndGet(1));
+                final String connectionId = generateConnectionId(serverName, requestCounter.addAndGet(1));
                 try {
                     final Socket acceptedSocket = welcomeSocket.accept();
                     acceptedSocket.setKeepAlive(true);
                     final Future future = executor.submit(
-                            new TCPHandler(requestId, acceptedSocket, controllersMap)
+                            new TCPHandler(connectionId, acceptedSocket, controllersMap)
                     );
                     future.get();
                 } catch (IOException e) {
-                    AppLogger.warn(LOG, () -> requestId, () -> "can't accept connection: " + e);
+                    AppLogger.warn(LOG, () -> connectionId, () -> "can't accept connection: " + e);
                 } catch (InterruptedException | ExecutionException e) {
-                    AppLogger.warn(LOG, () -> requestId, () -> "request interrupted: " + e);
+                    AppLogger.warn(LOG, () -> connectionId, () -> "request interrupted: " + e);
                     e.printStackTrace();
                 }
             }
         } catch (IOException e) {
             // TODO: can't open connection
             throw new RuntimeException(e);
+        } finally {
+            AppLogger.info(LOG, () -> serverName, () -> "closing server");
         }
     }
 }
