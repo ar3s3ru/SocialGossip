@@ -3,12 +3,12 @@ package socialgossip.server.usecases.lookup;
 import socialgossip.server.core.entities.friendship.Friendship;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.friendship.UserFriendshipFinder;
 import socialgossip.server.core.gateways.friendship.UserFriendship;
+import socialgossip.server.core.gateways.friendship.UserFriendshipFinder;
 import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
-import socialgossip.server.usecases.ProtectedUseCase;
 import socialgossip.server.logging.AppLogger;
+import socialgossip.server.usecases.ProtectedUseCase;
 
 import java.util.Objects;
 import java.util.function.Consumer;

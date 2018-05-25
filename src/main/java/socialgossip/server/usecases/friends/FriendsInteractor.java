@@ -6,9 +6,9 @@ import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.friendship.FriendshipsLister;
 import socialgossip.server.core.gateways.session.SessionFinder;
+import socialgossip.server.logging.AppLogger;
 import socialgossip.server.usecases.ProtectedUseCase;
 import socialgossip.server.usecases.friendship.FriendshipOutput;
-import socialgossip.server.logging.AppLogger;
 
 import java.util.*;
 import java.util.function.Consumer;

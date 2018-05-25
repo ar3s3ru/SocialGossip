@@ -5,10 +5,10 @@ import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.core.gateways.notifications.UnsupportedNotificationException;
 import socialgossip.server.core.gateways.session.SessionFinder;
-import socialgossip.server.core.gateways.session.SessionRemover;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
-import socialgossip.server.usecases.ProtectedUseCase;
+import socialgossip.server.core.gateways.session.SessionRemover;
 import socialgossip.server.logging.AppLogger;
+import socialgossip.server.usecases.ProtectedUseCase;
 
 import java.util.Objects;
 import java.util.function.Consumer;

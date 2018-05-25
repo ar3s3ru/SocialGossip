@@ -78,6 +78,7 @@ public final class TCPServer implements Runnable {
                     AppLogger.warn(LOG, () -> requestId, () -> "can't accept connection: " + e);
                 } catch (InterruptedException | ExecutionException e) {
                     AppLogger.warn(LOG, () -> requestId, () -> "request interrupted: " + e);
+                    e.printStackTrace();
                 }
             }
         } catch (IOException e) {

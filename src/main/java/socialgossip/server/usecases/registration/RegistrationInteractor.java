@@ -7,10 +7,10 @@ import socialgossip.server.core.entities.password.Password;
 import socialgossip.server.core.entities.user.InvalidUserException;
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.user.UserInserter;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
-import socialgossip.server.usecases.AbstractUseCase;
+import socialgossip.server.core.gateways.user.UserInserter;
 import socialgossip.server.logging.AppLogger;
+import socialgossip.server.usecases.AbstractUseCase;
 
 import java.util.IllformedLocaleException;
 import java.util.Locale;

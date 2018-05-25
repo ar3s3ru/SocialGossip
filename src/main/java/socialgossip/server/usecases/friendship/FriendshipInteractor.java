@@ -5,15 +5,15 @@ import socialgossip.server.core.entities.friendship.InvalidFriendshipException;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.GatewayException;
-import socialgossip.server.core.gateways.friendship.FriendshipInserter;
 import socialgossip.server.core.gateways.friendship.FriendshipAlreadyExistsException;
+import socialgossip.server.core.gateways.friendship.FriendshipInserter;
 import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.core.gateways.notifications.UnsupportedNotificationException;
 import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
-import socialgossip.server.usecases.ProtectedUseCase;
 import socialgossip.server.logging.AppLogger;
+import socialgossip.server.usecases.ProtectedUseCase;
 
 import java.util.Objects;
 import java.util.function.Consumer;

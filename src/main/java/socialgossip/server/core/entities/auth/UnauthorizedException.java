@@ -1,7 +1,5 @@
 package socialgossip.server.core.entities.auth;
 
-import socialgossip.server.core.entities.session.Session;
-
 /**
  * Exception raised when trying to access a {@link ProtectedResource} with
  * an unauthorized {@link Permission}.

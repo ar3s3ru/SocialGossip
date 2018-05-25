@@ -2,13 +2,13 @@ package socialgossip.server.dataproviders;
 
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
-import socialgossip.server.core.gateways.session.SessionInserter;
-import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
+import socialgossip.server.core.gateways.session.SessionFinder;
+import socialgossip.server.core.gateways.session.SessionInserter;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
-import socialgossip.server.core.gateways.user.UserInserter;
-import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
+import socialgossip.server.core.gateways.user.UserFinder;
+import socialgossip.server.core.gateways.user.UserInserter;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
 
 import java.util.HashMap;

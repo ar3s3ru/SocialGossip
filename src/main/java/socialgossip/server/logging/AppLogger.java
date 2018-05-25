@@ -1,7 +1,5 @@
 package socialgossip.server.logging;
 
-import socialgossip.server.usecases.UseCase;
-
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;

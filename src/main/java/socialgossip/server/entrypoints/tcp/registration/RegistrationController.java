@@ -14,7 +14,8 @@ import socialgossip.server.presentation.Presenter;
 import socialgossip.server.usecases.registration.RegistrationErrors;
 import socialgossip.server.usecases.registration.RegistrationUseCase;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.IllformedLocaleException;
 import java.util.Objects;
 
