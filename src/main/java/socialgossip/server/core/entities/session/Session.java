@@ -102,4 +102,27 @@ public class Session implements Permission {
     public InetAddress getIpAddress() {
         return ipAddress;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Session session = (Session) o;
+        return Objects.equals(token, session.token);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(token);
+    }
+
+    @Override
+    public String toString() {
+        return "Session{" +
+                "token='" + token + '\'' +
+                ", user=" + user +
+                ", expireDate=" + expireDate +
+                ", ipAddress=" + ipAddress +
+                '}';
+    }
 }
