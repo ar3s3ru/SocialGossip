@@ -12,46 +12,33 @@ import java.util.logging.Logger;
  */
 public final class AppLogger {
     public static void fine(final Logger logger,
-                            final UseCase.Input input,
+                            final Supplier<String> requestId,
                             final Supplier<String> message) {
-        log(Level.FINE, logger, input.getRequestId(), message);
+        log(Level.FINE, logger, requestId, message);
     }
 
     public static void info(final Logger logger,
-                            final UseCase.Input input,
+                            final Supplier<String> requestId,
                             final Supplier<String> message) {
-        log(Level.INFO, logger, input.getRequestId(), message);
+        log(Level.INFO, logger, requestId, message);
     }
 
     public static void warn(final Logger logger,
-                            final UseCase.Input input,
+                            final Supplier<String> requestId,
                             final Supplier<String> message) {
-        log(Level.WARNING, logger, input.getRequestId(), message);
+        log(Level.WARNING, logger, requestId, message);
     }
 
     public static void error(final Logger logger,
-                             final UseCase.Input input,
+                             final Supplier<String> requestId,
                              final Supplier<String> message) {
-        log(Level.SEVERE, logger, input.getRequestId(), message);
+        log(Level.SEVERE, logger, requestId, message);
     }
 
     public static <E extends Exception> void exception(final Logger logger,
-                                                       final UseCase.Input input,
+                                                       final Supplier<String> requestId,
                                                        final E exception) {
-        error(logger, input, () -> exception.getClass().getName() + ": " + exception);
-    }
-
-    private static void log(final Level logLevel,
-                            final Logger logger,
-                            final String requestId,
-                            final Supplier<String> message) {
-        // Example: "FINE: [ 2017-01-01T00:00:01.12345Z | 000001 ]    Hello world!"
-        Optional.ofNullable(logger)
-                .ifPresent(logger1 -> logger1.log(logLevel, () ->
-                        "[ "   + ISO8601Formatter.now() +
-                        " | "  + requestId +
-                        " ]\t" + message.get()
-                ));
+        error(logger, requestId, () -> exception.getClass().getName() + ": " + exception);
     }
 
     private static void log(final Level logLevel, final Logger logger,
@@ -62,12 +49,16 @@ public final class AppLogger {
                 final StringBuilder builder = new StringBuilder();
                 builder.append("[ ");
                 builder.append(ISO8601Formatter.now());
-                Optional.ofNullable(requestId.get()).ifPresent(id -> {
-                    builder.append(" | ");
-                    builder.append(requestId);
-                });
+                Optional.ofNullable(requestId).ifPresent(supplier ->
+                        Optional.ofNullable(supplier.get()).ifPresent(id -> {
+                            builder.append(" | ");
+                            builder.append(id);
+                        })
+                );
                 builder.append(" ]\t");
-                builder.append(Optional.ofNullable(message.get()).orElse("-- no message --"));
+                builder.append(Optional.ofNullable(message).map(supplier ->
+                        Optional.ofNullable(message.get()).orElse("-- no message --")
+                ).orElse("-- no message supplier --"));
                 return builder.toString();
             });
         });

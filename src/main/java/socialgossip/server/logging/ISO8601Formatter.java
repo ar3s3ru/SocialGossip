@@ -1,4 +1,4 @@
-package socialgossip.server.usecases.logging;
+package socialgossip.server.logging;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
