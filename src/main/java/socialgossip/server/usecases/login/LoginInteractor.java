@@ -15,6 +15,7 @@ import socialgossip.server.logging.AppLogger;
 import socialgossip.server.usecases.AbstractUseCase;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -112,14 +113,17 @@ public final class LoginInteractor
     }
 
     private void tryRegisteringAndSendingLoginNotification(final LoginUseCase.Input input, final Session session) {
-        try {
-            AppLogger.fine(LOG, input::getRequestId, () -> "registering Friendships notification handler...");
-            notifier.register(input.getFriendshipsHandler().apply(session));
+        AppLogger.fine(LOG, input::getRequestId, () -> "registering Friendships notification handler...");
+        Optional.ofNullable(input.getFriendshipsHandler()).ifPresent(handler -> {
+            notifier.register(handler.apply(session));
+            AppLogger.fine(LOG, input::getRequestId, () -> "handler registered successfully");
             AppLogger.fine(LOG, input::getRequestId, () -> "sending login notification...");
-            notifier.send(notificationFactory.produce(session));
-        } catch (UnsupportedNotificationException e) {
-            AppLogger.warn(LOG, input::getRequestId, () -> "UnsupportedNotificationException: " + e.getMessage());
-        }
+            try {
+                notifier.send(notificationFactory.produce(session));
+            } catch (UnsupportedNotificationException e) {
+                AppLogger.warn(LOG, input::getRequestId, () -> "UnsupportedNotificationException: " + e.getMessage());
+            }
+        });
     }
 
     private LoginOutput produceNewOutput(final Session session) {
