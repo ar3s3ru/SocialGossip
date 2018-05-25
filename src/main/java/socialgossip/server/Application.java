@@ -1,6 +1,5 @@
 package socialgossip.server;
 
-import socialgossip.server.core.entities.password.EncryptionSchema;
 import socialgossip.server.dataproviders.InMemoryRepository;
 import socialgossip.server.entrypoints.tcp.TCPServer;
 import socialgossip.server.entrypoints.tcp.registration.RegistrationController;
@@ -10,6 +9,7 @@ import socialgossip.server.security.BcryptSchema;
 import socialgossip.server.security.SimplePasswordValidator;
 import socialgossip.server.usecases.registration.RegistrationInteractor;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -31,7 +31,8 @@ public class Application {
         final RegistrationPresenter presenter = new RegistrationPresenter();
         final RegistrationController controller = new RegistrationController(server, interactor, presenter);
 
-        Logger.getLogger(RegistrationInteractor.class.getName()).setLevel(Level.ALL);
+        // TODO: don't do this, use a logging config file
+        Arrays.stream(Logger.getGlobal().getHandlers()).forEach(h -> h.setLevel(Level.FINE));
 
         AppLogger.info(Logger.getGlobal(), null, () -> "starting TCP server...");
         final Future future = executor.submit(server);
