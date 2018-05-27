@@ -3,20 +3,18 @@ package socialgossip.server.dataproviders;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.entities.user.User;
 import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
-import socialgossip.server.core.gateways.session.SessionFinder;
-import socialgossip.server.core.gateways.session.SessionInserter;
 import socialgossip.server.core.gateways.session.SessionNotFoundException;
+import socialgossip.server.core.gateways.session.SessionRepository;
 import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
-import socialgossip.server.core.gateways.user.UserFinder;
-import socialgossip.server.core.gateways.user.UserInserter;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
+import socialgossip.server.core.gateways.user.UserRepository;
 
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 
 public class InMemoryRepository
-        implements UserInserter, UserFinder, SessionInserter, SessionFinder {
+        implements UserRepository, SessionRepository {
 
     private final HashMap<String, User>    userMap;
     private final HashMap<String, Session> sessionMap;
@@ -68,6 +66,16 @@ public class InMemoryRepository
             Objects.requireNonNull(token);
             return Optional.ofNullable(sessionMap.get(token))
                     .orElseThrow(() -> new SessionNotFoundException(token));
+        }
+    }
+
+    @Override
+    public void remove(final Session session) throws SessionNotFoundException {
+        synchronized (sessionMap) {
+            Objects.requireNonNull(session);
+            Optional.ofNullable(sessionMap.get(session.getToken()))
+                    .map((s) -> sessionMap.remove(s.getToken()))
+                    .orElseThrow(() -> new SessionNotFoundException(session.getToken()));
         }
     }
 }

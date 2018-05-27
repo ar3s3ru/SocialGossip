@@ -11,14 +11,17 @@ import socialgossip.server.core.gateways.notifications.Notification;
 import socialgossip.server.core.gateways.notifications.NotificationHandler;
 import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.entrypoints.tcp.TCPServer;
+import socialgossip.server.entrypoints.tcp.authorized.logout.LogoutController;
 import socialgossip.server.entrypoints.tcp.login.LoginController;
 import socialgossip.server.entrypoints.tcp.registration.RegistrationController;
 import socialgossip.server.factories.session.UUIDv4SessionFactory;
 import socialgossip.server.logging.AppLogger;
 import socialgossip.server.presentation.login.LoginPresenter;
+import socialgossip.server.presentation.logout.LogoutPresenter;
 import socialgossip.server.presentation.registration.RegistrationPresenter;
 import socialgossip.server.usecases.login.LoginInteractor;
 import socialgossip.server.usecases.login.SessionFactory;
+import socialgossip.server.usecases.logout.LogoutInteractor;
 import socialgossip.server.usecases.registration.RegistrationInteractor;
 
 import java.util.concurrent.ExecutionException;
@@ -51,27 +54,35 @@ class Application {
                         securityComponent.encryptionSchema()
         );
 
+        final Notifier notifier = new Notifier() {
+            @Override
+            public void register(final NotificationHandler handler) {
+                AppLogger.fine(Logger.getGlobal(), null, () -> "register: " + handler);
+            }
+
+            @Override
+            public void unregister(final SessionScoped scope) {
+                AppLogger.fine(Logger.getGlobal(), null, () -> "unregister: " + scope);
+            }
+
+            @Override
+            public void send(final Notification notification) {
+                AppLogger.fine(Logger.getGlobal(), null, () -> "send: " + notification);
+            }
+        };
+
         final LoginInteractor interactor1 = new LoginInteractor(
                 dataproviderComponent.userRepository(),
                 dataproviderComponent.sessionRepository(),
                 securityComponent.passwordValidator(),
-                factory,
-                new Notifier() {
-                    @Override
-                    public void register(final NotificationHandler handler) {
-                        AppLogger.fine(Logger.getGlobal(), null, () -> "register: " + handler);
-                    }
+                factory, notifier
+        );
 
-                    @Override
-                    public void unregister(final SessionScoped scope) {
-                        AppLogger.fine(Logger.getGlobal(), null, () -> "unregister: " + scope);
-                    }
-
-                    @Override
-                    public void send(final Notification notification) {
-                        AppLogger.fine(Logger.getGlobal(), null, () -> "send: " + notification);
-                    }
-                });
+        final LogoutInteractor interactor2 = new LogoutInteractor(
+                dataproviderComponent.sessionRepository(),
+                dataproviderComponent.sessionRepository(),
+                notifier
+        );
 
         final RegistrationPresenter presenter = new RegistrationPresenter();
         final RegistrationController controller = new RegistrationController(presenter, interactor);
@@ -79,8 +90,12 @@ class Application {
         final LoginPresenter presenter1 = new LoginPresenter();
         final LoginController controller1 = new LoginController(presenter1, interactor1);
 
+        final LogoutPresenter presenter2 = new LogoutPresenter();
+        final LogoutController controller2 = new LogoutController(presenter2, interactor2);
+
         server.registerController("register", controller);
         server.registerController("login", controller1);
+        server.registerController("logout", controller2);
 
         AppLogger.info(Logger.getGlobal(), null, () -> "starting TCP server...");
         final Future future = appComponent.executor().submit(server);

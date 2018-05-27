@@ -1,4 +1,5 @@
 package socialgossip.server.core.gateways.session;
 
-public interface SessionRepository {
+public interface SessionRepository
+        extends SessionInserter, SessionFinder, SessionRemover {
 }

@@ -1,10 +1,12 @@
-package socialgossip.server.configuration.dataproviders;
+package socialgossip.server.configuration.dataproviders.inmemory;
 
 import dagger.Module;
 import dagger.Provides;
+import socialgossip.server.configuration.dataproviders.UserRepositoryModule;
+import socialgossip.server.core.gateways.session.SessionRepository;
+import socialgossip.server.core.gateways.user.UserRepository;
 import socialgossip.server.dataproviders.InMemoryRepository;
 
-import javax.inject.Singleton;
 import java.util.Objects;
 
 @Module(includes = UserRepositoryModule.class)
@@ -19,9 +21,11 @@ public class InMemoryModule {
         this.repository = Objects.requireNonNull(repository);
     }
 
-    @Provides
-    @Singleton
-    public UserRepository provideUserRepository() {
+    @Provides UserRepository provideUserRepository() {
+        return repository;
+    }
+
+    @Provides SessionRepository provideSessionRepository() {
         return repository;
     }
 }
