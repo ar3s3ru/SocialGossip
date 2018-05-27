@@ -1,12 +1,15 @@
 package socialgossip.server;
 
-import socialgossip.server.core.entities.password.PasswordValidator;
+import socialgossip.server.configuration.application.ApplicationComponent;
+import socialgossip.server.configuration.application.DaggerApplicationComponent;
+import socialgossip.server.configuration.dataproviders.DaggerDataproviderComponent;
+import socialgossip.server.configuration.dataproviders.DataproviderComponent;
+import socialgossip.server.configuration.security.DaggerSecurityComponent;
+import socialgossip.server.configuration.security.SecurityComponent;
 import socialgossip.server.core.entities.session.SessionScoped;
 import socialgossip.server.core.gateways.notifications.Notification;
 import socialgossip.server.core.gateways.notifications.NotificationHandler;
 import socialgossip.server.core.gateways.notifications.Notifier;
-import socialgossip.server.core.gateways.notifications.UnsupportedNotificationException;
-import socialgossip.server.dataproviders.InMemoryRepository;
 import socialgossip.server.entrypoints.tcp.TCPServer;
 import socialgossip.server.entrypoints.tcp.login.LoginController;
 import socialgossip.server.entrypoints.tcp.registration.RegistrationController;
@@ -14,33 +17,46 @@ import socialgossip.server.factories.session.UUIDv4SessionFactory;
 import socialgossip.server.logging.AppLogger;
 import socialgossip.server.presentation.login.LoginPresenter;
 import socialgossip.server.presentation.registration.RegistrationPresenter;
-import socialgossip.server.security.BcryptSchema;
-import socialgossip.server.security.SimplePasswordValidator;
 import socialgossip.server.usecases.login.LoginInteractor;
 import socialgossip.server.usecases.login.SessionFactory;
 import socialgossip.server.usecases.registration.RegistrationInteractor;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Logger;
 
-public class Application {
-    public static void main(String[] args) {
-        final ThreadPoolExecutor executor =
-                (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        final TCPServer server = new TCPServer("tcp", 8080, executor);
+class Application {
+    private final ApplicationComponent  appComponent;
+    private final SecurityComponent     securityComponent;
+    private final DataproviderComponent dataproviderComponent;
 
-        final PasswordValidator passwordValidator = new SimplePasswordValidator();
-        final BcryptSchema bcryptSchema = new BcryptSchema(passwordValidator);
+    Application() {
+        securityComponent     = DaggerSecurityComponent.create();
+        dataproviderComponent = DaggerDataproviderComponent.create();
+
+        appComponent = DaggerApplicationComponent
+                .builder()
+                .securityComponent(securityComponent)
+                .dataproviderComponent(dataproviderComponent)
+                .build();
+    }
+
+    void start() {
+        final TCPServer server = new TCPServer("tcp", 8080, appComponent.executor());
 
         final SessionFactory factory = new UUIDv4SessionFactory();
 
-        final InMemoryRepository repository = new InMemoryRepository();
-        final RegistrationInteractor interactor = new RegistrationInteractor(repository, bcryptSchema);
+        final RegistrationInteractor interactor = new RegistrationInteractor(
+                        dataproviderComponent.userRepository(),
+                        securityComponent.encryptionSchema()
+        );
+
         final LoginInteractor interactor1 = new LoginInteractor(
-                repository, repository, passwordValidator, factory, new Notifier() {
+                dataproviderComponent.userRepository(),
+                dataproviderComponent.sessionRepository(),
+                securityComponent.passwordValidator(),
+                factory,
+                new Notifier() {
                     @Override
                     public void register(final NotificationHandler handler) {
                         AppLogger.fine(Logger.getGlobal(), null, () -> "register: " + handler);
@@ -67,7 +83,7 @@ public class Application {
         server.registerController("login", controller1);
 
         AppLogger.info(Logger.getGlobal(), null, () -> "starting TCP server...");
-        final Future future = executor.submit(server);
+        final Future future = appComponent.executor().submit(server);
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {

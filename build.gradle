@@ -1,11 +1,43 @@
-apply plugin: 'java'
+plugins {
+    id 'application'
+    id "net.ltgt.apt" version "0.10"
+}
 
 sourceCompatibility = 1.8
+mainClassName = 'socialgossip.server.MainApplication'
 
 repositories {
     jcenter()
     mavenCentral()
 }
+
+sourceSets {
+    main {
+        java {
+            srcDirs += file('src/main/java')
+            srcDirs += file("$buildDir/generated/source/apt/main")
+        }
+    }
+
+    test {
+        java {
+            srcDirs += file('src/test/java')
+            srcDirs += file("$buildDir/generated/source/apt/test")
+        }
+    }
+}
+
+task cleanDaggerFiles {
+    delete "$buildDir/generated/source/apt/main"
+    delete "$buildDir/generated/source/apt/test"
+}
+
+// Dagger auto-generated files must be cleaned at each compilation
+compileJava.dependsOn cleanDaggerFiles
+compileTestJava.dependsOn cleanDaggerFiles
+
+// Clean Dagger files on clean, as well
+clean.doFirst { cleanDaggerFiles }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -13,4 +45,7 @@ dependencies {
 
     compile group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+
+    compile 'com.google.dagger:dagger:2.+'
+    apt 'com.google.dagger:dagger-compiler:2.+'
 }
