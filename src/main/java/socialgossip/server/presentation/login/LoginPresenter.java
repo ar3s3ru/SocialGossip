@@ -10,7 +10,7 @@ public final class LoginPresenter extends AbstractPresenter<LoginOutput> {
     public JSONObject getOkResponse(final LoginOutput result) {
         final JSONObject jsonObject = super.getOkResponse(result);
         jsonObject.put("token", result.getToken());
-        jsonObject.put("user", result.getUser());
+        jsonObject.put("username", result.getUser());
         jsonObject.put("expiresAt", ISO8601Formatter.from(result.getExpiresAt()));
         return jsonObject;
     }

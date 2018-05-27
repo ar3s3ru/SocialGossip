@@ -3,13 +3,13 @@ package socialgossip.server.entrypoints.tcp.login;
 import org.json.simple.JSONObject;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.notifications.NotificationHandler;
+import socialgossip.server.entrypoints.tcp.JSONInput;
 import socialgossip.server.usecases.login.LoginUseCase;
 
 import java.net.InetAddress;
 import java.util.function.Function;
 
-public class LoginJSONInput implements LoginUseCase.Input {
-    private final String requestId;
+public class LoginJSONInput extends JSONInput implements LoginUseCase.Input {
     private final String username;
     private final String password;
 
@@ -17,9 +17,9 @@ public class LoginJSONInput implements LoginUseCase.Input {
     private InetAddress ipAddress;
 
     public LoginJSONInput(final String requestId, final JSONObject jsonObject) {
-        this.username          = (String) jsonObject.get("username");
-        this.password          = (String) jsonObject.get("password");
-        this.requestId         = requestId;
+        super(requestId, jsonObject);
+        this.username = (String) jsonObject.get("username");
+        this.password = (String) jsonObject.get("password");
     }
 
     @Override
