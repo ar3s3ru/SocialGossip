@@ -4,8 +4,6 @@ import org.json.simple.JSONObject;
 import socialgossip.server.entrypoints.tcp.JSONInput;
 import socialgossip.server.usecases.registration.RegistrationUseCase;
 
-import java.util.Objects;
-
 public final class RegistrationJSONInput extends JSONInput implements RegistrationUseCase.Input {
     private final String username;
     private final String password;

@@ -9,9 +9,11 @@ public final class LoginPresenter extends AbstractPresenter<LoginOutput> {
     @Override
     public JSONObject getOkResponse(final LoginOutput result) {
         final JSONObject jsonObject = super.getOkResponse(result);
-        jsonObject.put("token", result.getToken());
-        jsonObject.put("username", result.getUser());
-        jsonObject.put("expiresAt", ISO8601Formatter.from(result.getExpiresAt()));
+        final JSONObject dataObject = new JSONObject();
+        dataObject.put("token", result.getToken());
+        dataObject.put("username", result.getUser());
+        dataObject.put("expiresAt", ISO8601Formatter.from(result.getExpiresAt()));
+        jsonObject.put("data", dataObject);
         return jsonObject;
     }
 }
