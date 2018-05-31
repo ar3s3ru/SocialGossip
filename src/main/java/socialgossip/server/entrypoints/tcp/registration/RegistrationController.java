@@ -9,76 +9,81 @@ import socialgossip.server.entrypoints.tcp.AbstractController;
 import socialgossip.server.entrypoints.tcp.IOConsumer;
 import socialgossip.server.entrypoints.tcp.TCPRequest;
 import socialgossip.server.presentation.Presenter;
+import socialgossip.server.usecases.UseCase;
 import socialgossip.server.usecases.registration.RegistrationErrors;
 import socialgossip.server.usecases.registration.RegistrationUseCase;
 
 import java.io.Writer;
 import java.util.IllformedLocaleException;
-import java.util.Objects;
+import java.util.function.Consumer;
 
 public class RegistrationController
-        extends AbstractController<RegistrationJSONInput, String> {
-
-    private final RegistrationUseCase<Void, RegistrationErrors> interactor;
+        extends AbstractController<String, RegistrationUseCase.Input, Void, RegistrationErrors> {
 
     public RegistrationController(final Presenter<String> presenter,
-                                  final RegistrationUseCase<Void, RegistrationErrors> interactor) {
-        super(presenter);
-        this.interactor = Objects.requireNonNull(interactor);
+                                  final UseCase<RegistrationUseCase.Input, Void, RegistrationErrors> interactor) {
+        super(presenter, interactor);
     }
 
     @Override
-    protected RegistrationJSONInput produceInputObject(final String requestId, final JSONObject object) {
-        return new RegistrationJSONInput(requestId, object);
+    protected RegistrationUseCase.Input produceInputObject(final TCPRequest request, final JSONObject object) {
+        final RegistrationJSONInput input = new RegistrationJSONInput(request.getId(), object);
+        // Add to the context for later retrieval by output consumer
+        request.contextAdd("username", input.getUsername());
+        return input;
     }
 
     @Override
-    protected void executor(final TCPRequest request, final RegistrationJSONInput input, final Writer responseWriter) {
-        interactor.execute(
-                input,
-                (IOConsumer<Void>) (v) -> {
-                    responseWriter.write(presenter.getOkResponse(input.getUsername()).toJSONString());
-                },
-                new RegistrationErrors() {
-                    @Override
-                    public void onInvalidLanguage(final IllformedLocaleException e) {
-                        ((IOConsumer<Throwable>) (t) -> {
-                            responseWriter.write(presenter.getErrorResponse(t).toJSONString());
-                        }).accept(e);
-                    }
+    protected Consumer<Void> produceOutputConsumer(final TCPRequest request, final Writer responseWriter) {
+        return (IOConsumer<Void>) (v) -> {
+            responseWriter.write(presenter.getOkResponse(
+                    (String) request.contextGet("username")
+            ).toJSONString());
+        };
+    }
 
-                    @Override
-                    public void onInvalidUser(final InvalidUserException e) {
-                        ((IOConsumer<Throwable>) (t) -> {
-                            responseWriter.write(presenter.getErrorResponse(t).toJSONString());
-                        }).accept(e);
-                    }
+    @Override
+    protected RegistrationErrors produceErrorHandler(final TCPRequest request, final Writer responseWriter) {
+        return new RegistrationErrors() {
+            @Override
+            public void onInvalidLanguage(final IllformedLocaleException e) {
+                ((IOConsumer<Throwable>) (t) -> {
+                    responseWriter.write(presenter.getErrorResponse(t).toJSONString());
+                }).accept(e);
+            }
 
-                    @Override
-                    public void onUserAlreadyExists(final UserAlreadyExistsException e) {
-                        ((IOConsumer<Throwable>) (t) -> {
-                            responseWriter.write(presenter.getFailResponse(t).toJSONString());
-                        }).accept(e);
-                    }
+            @Override
+            public void onInvalidUser(final InvalidUserException e) {
+                ((IOConsumer<Throwable>) (t) -> {
+                    responseWriter.write(presenter.getErrorResponse(t).toJSONString());
+                }).accept(e);
+            }
 
-                    @Override
-                    public void onGatewayError(final GatewayException e) {
-                        ((IOConsumer<Throwable>) (t) -> {
-                            responseWriter.write(presenter.getErrorResponse(t).toJSONString());
-                        }).accept(e);
-                    }
+            @Override
+            public void onUserAlreadyExists(final UserAlreadyExistsException e) {
+                ((IOConsumer<Throwable>) (t) -> {
+                    responseWriter.write(presenter.getFailResponse(t).toJSONString());
+                }).accept(e);
+            }
 
-                    @Override
-                    public void onInvalidPassword(final InvalidPasswordException e) {
-                        ((IOConsumer<Throwable>) (t) -> {
-                            responseWriter.write(presenter.getFailResponse(t).toJSONString());
-                        }).accept(e);
-                    }
+            @Override
+            public void onGatewayError(final GatewayException e) {
+                ((IOConsumer<Throwable>) (t) -> {
+                    responseWriter.write(presenter.getErrorResponse(t).toJSONString());
+                }).accept(e);
+            }
 
-                    @Override
-                    public void onError(Exception e) {
-                        // TODO: finish this
-                    }
-                });
+            @Override
+            public void onInvalidPassword(final InvalidPasswordException e) {
+                ((IOConsumer<Throwable>) (t) -> {
+                    responseWriter.write(presenter.getFailResponse(t).toJSONString());
+                }).accept(e);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                // TODO: finish this
+            }
+        };
     }
 }

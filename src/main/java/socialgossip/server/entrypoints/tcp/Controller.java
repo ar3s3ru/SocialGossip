@@ -7,5 +7,5 @@ import java.io.Writer;
 
 public interface Controller<InputType> {
     void handle(TCPRequest request, Writer responseWriter);
-    InputType parseInput(String requestId, String json) throws IOException, ParseException;
+    InputType parseInput(TCPRequest request) throws IOException, ParseException;
 }
