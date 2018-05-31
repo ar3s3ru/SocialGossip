@@ -2,107 +2,63 @@ package socialgossip.server;
 
 import socialgossip.server.configuration.application.ApplicationComponent;
 import socialgossip.server.configuration.application.DaggerApplicationComponent;
-import socialgossip.server.configuration.dataproviders.DaggerDataproviderComponent;
+import socialgossip.server.configuration.controller.ControllerComponent;
+import socialgossip.server.configuration.controller.DaggerControllerComponent;
 import socialgossip.server.configuration.dataproviders.DataproviderComponent;
-import socialgossip.server.configuration.security.DaggerSecurityComponent;
+import socialgossip.server.configuration.dataproviders.inmemory.InMemoryModule;
+import socialgossip.server.configuration.interactors.InteractorsComponent;
+import socialgossip.server.configuration.interactors.LoginModule;
+import socialgossip.server.configuration.interactors.LogoutModule;
+import socialgossip.server.configuration.interactors.RegistrationModule;
+import socialgossip.server.configuration.presentation.PresentationComponent;
+import socialgossip.server.configuration.presentation.PresentersModule;
+import socialgossip.server.configuration.security.BcryptModule;
 import socialgossip.server.configuration.security.SecurityComponent;
-import socialgossip.server.core.entities.session.SessionScoped;
-import socialgossip.server.core.gateways.notifications.Notification;
-import socialgossip.server.core.gateways.notifications.NotificationHandler;
-import socialgossip.server.core.gateways.notifications.Notifier;
-import socialgossip.server.entrypoints.tcp.TCPServer;
-import socialgossip.server.entrypoints.tcp.authorized.logout.LogoutController;
-import socialgossip.server.entrypoints.tcp.login.LoginController;
-import socialgossip.server.entrypoints.tcp.registration.RegistrationController;
-import socialgossip.server.factories.session.UUIDv4SessionFactory;
+import socialgossip.server.configuration.server.ServerComponent;
+import socialgossip.server.configuration.server.TCPServerModule;
 import socialgossip.server.logging.AppLogger;
-import socialgossip.server.presentation.login.LoginPresenter;
-import socialgossip.server.presentation.logout.LogoutPresenter;
-import socialgossip.server.presentation.registration.RegistrationPresenter;
-import socialgossip.server.usecases.login.LoginInteractor;
-import socialgossip.server.usecases.login.SessionFactory;
-import socialgossip.server.usecases.logout.LogoutInteractor;
-import socialgossip.server.usecases.registration.RegistrationInteractor;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 class Application {
-    private final ApplicationComponent  appComponent;
-    private final SecurityComponent     securityComponent;
-    private final DataproviderComponent dataproviderComponent;
+    final ApplicationComponent  appComponent;
+    final SecurityComponent     securityComponent;
+    final DataproviderComponent dataproviderComponent;
+    final InteractorsComponent  interactorsComponent;
+    final ServerComponent       serverComponent;
+    final PresentationComponent presentationComponent;
+    final ControllerComponent   controllerComponent;
 
     Application() {
-        securityComponent     = DaggerSecurityComponent.create();
-        dataproviderComponent = DaggerDataproviderComponent.create();
+        appComponent          = DaggerApplicationComponent.create();
+        securityComponent     = appComponent.attachSecurityComponent(new BcryptModule());
+        dataproviderComponent = securityComponent.attachDataproviderComponent(new InMemoryModule());
+        serverComponent       = appComponent.attachServerComponent(new TCPServerModule("tcp", 8080));
+        presentationComponent = serverComponent.attachPresentationComponent(new PresentersModule());
 
-        appComponent = DaggerApplicationComponent
-                .builder()
-                .securityComponent(securityComponent)
-                .dataproviderComponent(dataproviderComponent)
-                .build();
+        interactorsComponent = dataproviderComponent.attachInteractorsComponent(
+                new RegistrationModule(), new LoginModule(), new LogoutModule()
+        );
+
+        controllerComponent = DaggerControllerComponent.builder()
+                                .interactorsComponent(interactorsComponent)
+                                .presentationComponent(presentationComponent)
+                                .build();
+
+        serverComponent.tcpServer().registerController("register", controllerComponent.registrationController());
+        serverComponent.tcpServer().registerController("login",    controllerComponent.loginController());
+        serverComponent.tcpServer().registerController("logout",   controllerComponent.logoutController());
     }
 
     void start() {
-        final TCPServer server = new TCPServer("tcp", 8080, appComponent.executor());
-
-        final SessionFactory factory = new UUIDv4SessionFactory();
-
-        final RegistrationInteractor interactor = new RegistrationInteractor(
-                        dataproviderComponent.userRepository(),
-                        securityComponent.encryptionSchema()
-        );
-
-        final Notifier notifier = new Notifier() {
-            @Override
-            public void register(final NotificationHandler handler) {
-                AppLogger.fine(Logger.getGlobal(), null, () -> "register: " + handler);
-            }
-
-            @Override
-            public void unregister(final SessionScoped scope) {
-                AppLogger.fine(Logger.getGlobal(), null, () -> "unregister: " + scope);
-            }
-
-            @Override
-            public void send(final Notification notification) {
-                AppLogger.fine(Logger.getGlobal(), null, () -> "send: " + notification);
-            }
-        };
-
-        final LoginInteractor interactor1 = new LoginInteractor(
-                dataproviderComponent.userRepository(),
-                dataproviderComponent.sessionRepository(),
-                securityComponent.passwordValidator(),
-                factory, notifier
-        );
-
-        final LogoutInteractor interactor2 = new LogoutInteractor(
-                dataproviderComponent.sessionRepository(),
-                dataproviderComponent.sessionRepository(),
-                notifier
-        );
-
-        final RegistrationPresenter presenter = new RegistrationPresenter();
-        final RegistrationController controller = new RegistrationController(presenter, interactor);
-
-        final LoginPresenter presenter1 = new LoginPresenter();
-        final LoginController controller1 = new LoginController(presenter1, interactor1);
-
-        final LogoutPresenter presenter2 = new LogoutPresenter();
-        final LogoutController controller2 = new LogoutController(presenter2, interactor2);
-
-        server.registerController("register", controller);
-        server.registerController("login", controller1);
-        server.registerController("logout", controller2);
-
         AppLogger.info(Logger.getGlobal(), null, () -> "starting TCP server...");
-        final Future future = appComponent.executor().submit(server);
+        final Future future = appComponent.executor().submit(serverComponent.tcpServer());
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {
-
+            AppLogger.exception(Logger.getGlobal(), null, e);
         }
     }
 }

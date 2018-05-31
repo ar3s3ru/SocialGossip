@@ -9,8 +9,10 @@ import socialgossip.server.core.gateways.user.UserRepository;
 @Module
 public abstract class UserRepositoryModule {
     @Binds
+    @DataproviderScope
     public abstract UserFinder provideUserFinder(UserRepository repository);
 
     @Binds
+    @DataproviderScope
     public abstract UserInserter provideUserInserter(UserRepository repository);
 }
