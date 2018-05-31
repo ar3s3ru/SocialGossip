@@ -15,7 +15,6 @@ import socialgossip.server.logging.AppLogger;
 import socialgossip.server.usecases.AbstractUseCase;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -64,7 +63,7 @@ public final class LoginInteractor
             final User user = retrieveUserByUsername(input);
             validateInputPassword(input, user);
             final Session session = createAndAddNewSession(input, user);
-            tryRegisteringAndSendingLoginNotification(input, session);
+            sendingLoginNotification(input, session);
             onSuccess.accept(produceNewOutput(session));
         } catch (UserNotFoundException e) {
             AppLogger.exception(LOG, input::getRequestId, e);
@@ -112,18 +111,13 @@ public final class LoginInteractor
         return session;
     }
 
-    private void tryRegisteringAndSendingLoginNotification(final LoginUseCase.Input input, final Session session) {
-        AppLogger.fine(LOG, input::getRequestId, () -> "registering Friendships notification handler...");
-        Optional.ofNullable(input.getFriendshipsHandler()).ifPresent(handler -> {
-            notifier.register(handler.apply(session));
-            AppLogger.fine(LOG, input::getRequestId, () -> "handler registered successfully");
-            AppLogger.fine(LOG, input::getRequestId, () -> "sending login notification...");
-            try {
-                notifier.send(notificationFactory.produce(session));
-            } catch (UnsupportedNotificationException e) {
-                AppLogger.warn(LOG, input::getRequestId, () -> "UnsupportedNotificationException: " + e.getMessage());
-            }
-        });
+    private void sendingLoginNotification(final LoginUseCase.Input input, final Session session) {
+        AppLogger.fine(LOG, input::getRequestId, () -> "sending login notification...");
+        try {
+            notifier.send(notificationFactory.produce(session));
+        } catch (UnsupportedNotificationException e) {
+            AppLogger.warn(LOG, input::getRequestId, () -> "UnsupportedNotificationException: " + e.getMessage());
+        }
     }
 
     private LoginOutput produceNewOutput(final Session session) {
