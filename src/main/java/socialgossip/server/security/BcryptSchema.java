@@ -30,13 +30,18 @@ public class BcryptSchema extends EncryptionSchema<String> {
         return new BcryptPassword(hash, salt);
     }
 
+    @Override
+    public EncryptedPassword<String> encryptedPassword(final String hash, final String salt) {
+        return BcryptPassword.from(hash, salt);
+    }
+
     /**
      * Encrypted {@link socialgossip.server.core.entities.password.Password}
      * using the {@link BCrypt} encryption schema.
      */
     public final static class BcryptPassword extends EncryptedPassword<String> {
 
-        private BcryptPassword(String hash, String salt) {
+        private BcryptPassword(final String hash, final String salt) {
             super(hash, salt);
         }
 
@@ -48,7 +53,7 @@ public class BcryptSchema extends EncryptionSchema<String> {
          * @param salt is the encrypted password salt.
          * @return a {@link BcryptPassword} instance with hash and salt.
          */
-        public static BcryptPassword from(String hash, String salt) {
+        public static BcryptPassword from(final String hash, final String salt) {
             // TODO(ar3s3ru): insert a validation step.
             return new BcryptPassword(hash, salt);
         }

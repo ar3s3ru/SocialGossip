@@ -30,4 +30,6 @@ public abstract class EncryptionSchema<T> {
     }
 
     protected abstract EncryptedPassword<T> encrypt(String password);
+
+    public abstract EncryptedPassword<T> encryptedPassword(String hash, String salt);
 }
