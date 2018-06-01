@@ -15,6 +15,7 @@ import socialgossip.server.usecases.registration.RegistrationUseCase;
 
 import java.io.Writer;
 import java.util.IllformedLocaleException;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class RegistrationController
@@ -29,7 +30,9 @@ public class RegistrationController
     protected RegistrationUseCase.Input produceInputObject(final TCPRequest request, final JSONObject object) {
         final RegistrationJSONInput input = new RegistrationJSONInput(request.getId(), object);
         // Add to the context for later retrieval by output consumer
-        request.contextAdd("username", input.getUsername());
+        Optional.ofNullable(input.getUsername()).ifPresent(
+                u -> request.contextAdd("username", u)
+        );
         return input;
     }
 

@@ -1,25 +1,31 @@
 package socialgossip.server.entrypoints.tcp.login;
 
 import org.json.simple.JSONObject;
-import socialgossip.server.core.entities.session.Session;
-import socialgossip.server.core.gateways.notifications.NotificationHandler;
 import socialgossip.server.entrypoints.tcp.JSONInput;
 import socialgossip.server.usecases.login.LoginUseCase;
+import socialgossip.server.validation.ValidationException;
 
 import java.net.InetAddress;
-import java.util.function.Function;
+import java.util.Optional;
 
 public class LoginJSONInput extends JSONInput implements LoginUseCase.Input {
+    public static final String USERNAME_FIELD = "username";
+    public static final String PASSWORD_FIELD = "password";
+
     private final String username;
     private final String password;
-
-    private Function<Session, NotificationHandler> friendshipHandler;
     private InetAddress ipAddress;
 
     public LoginJSONInput(final String requestId, final JSONObject jsonObject) {
         super(requestId, jsonObject);
-        this.username = (String) jsonObject.get("username");
-        this.password = (String) jsonObject.get("password");
+        this.username = (String) jsonObject.get(USERNAME_FIELD);
+        this.password = (String) jsonObject.get(PASSWORD_FIELD);
+    }
+
+    @Override
+    public void validate() throws ValidationException {
+        Optional.ofNullable(username).orElseThrow(() -> new ValidationException(USERNAME_FIELD, "can't be null"));
+        Optional.ofNullable(password).orElseThrow(() -> new ValidationException(PASSWORD_FIELD, "can't be null"));
     }
 
     @Override
@@ -45,15 +51,5 @@ public class LoginJSONInput extends JSONInput implements LoginUseCase.Input {
     @Override
     public InetAddress getIpAddress() {
         return ipAddress;
-    }
-
-    public LoginJSONInput withFriendshipsHandler(final Function<Session, NotificationHandler> handler) {
-        this.friendshipHandler = handler;
-        return this;
-    }
-
-    @Override
-    public Function<Session, NotificationHandler> getFriendshipsHandler() {
-        return friendshipHandler;
     }
 }

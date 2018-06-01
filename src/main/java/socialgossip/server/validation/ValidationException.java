@@ -1,4 +1,4 @@
-package socialgossip.server.entrypoints.validation;
+package socialgossip.server.validation;
 
 public class ValidationException extends Exception {
     public ValidationException(final String field, final String reason) {

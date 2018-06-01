@@ -48,11 +48,6 @@ public class LoginInteractorTest {
             public InetAddress getIpAddress() { return InetAddress.getLoopbackAddress(); }
 
             @Override
-            public Function<Session, NotificationHandler> getFriendshipsHandler() {
-                return null;
-            }
-
-            @Override
             public String getRequestId() { return "runWithNotExistentUserTest"; }
         }, (v) -> fail("should not complete!"), new LoginErrors() {
             @Override
