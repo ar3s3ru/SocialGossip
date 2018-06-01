@@ -10,7 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 final class TCPHandler implements Runnable {
-    private static final Logger LOG = Logger.getLogger(TCPHandler.class.getName());
+    private static final Logger LOG       = Logger.getLogger(TCPHandler.class.getName());
+    public  static final String EXIT_CODE = "exit";
 
     private final Map<String, Controller> controllersMap;
     private final Socket socket;

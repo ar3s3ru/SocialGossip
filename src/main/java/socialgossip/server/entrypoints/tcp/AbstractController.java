@@ -7,6 +7,8 @@ import socialgossip.server.logging.AppLogger;
 import socialgossip.server.presentation.Presenter;
 import socialgossip.server.usecases.ErrorsHandler;
 import socialgossip.server.usecases.UseCase;
+import socialgossip.server.validation.Validable;
+import socialgossip.server.validation.ValidationException;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -36,6 +38,12 @@ public abstract class AbstractController<
     protected abstract Consumer<OutputType> produceOutputConsumer(final TCPRequest request, final Writer responseWriter);
     protected abstract ErrorType produceErrorHandler(final TCPRequest request, final Writer responseWriter);
 
+    protected void validateInputObject(final InputType input) throws ValidationException {
+        if (input instanceof Validable) {
+            ((Validable) input).validate();
+        }
+    }
+
     protected void executor(final TCPRequest request, final InputType input, final Writer responseWriter) {
         interactor.execute(
                 input,
@@ -54,8 +62,9 @@ public abstract class AbstractController<
     public void handle(final TCPRequest request, final Writer responseWriter) {
         try {
             final InputType input = parseInput(request);
+            validateInputObject(input);
             executor(request, input, responseWriter);
-        } catch (ParseException e) {
+        } catch (ParseException | ValidationException e) {
             AppLogger.exception(LOG, request::getId, e);
             ((IOConsumer<Throwable>) (t) -> {
                 responseWriter.write(presenter.getErrorResponse(t).toJSONString());
