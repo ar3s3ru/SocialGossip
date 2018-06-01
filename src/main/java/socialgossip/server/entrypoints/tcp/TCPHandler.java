@@ -68,6 +68,6 @@ final class TCPHandler implements Runnable {
         } catch (IOException e) {
             AppLogger.error(LOG, () -> connectionId, () -> "error while handling connection: " + e);
         }
-        AppLogger.fine(LOG, () -> connectionId, () -> "connection closed");
+        AppLogger.info(LOG, () -> connectionId, () -> "connection closed");
     }
 }
