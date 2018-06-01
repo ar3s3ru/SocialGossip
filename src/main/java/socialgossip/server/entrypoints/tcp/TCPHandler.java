@@ -41,7 +41,7 @@ final class TCPHandler implements Runnable {
                 try {
                     final String opcode = reader.readLine();
                     AppLogger.fine(LOG, () -> requestId, () -> "requested opcode: " + opcode);
-                    if (Objects.isNull(opcode)) {
+                    if (Objects.isNull(opcode) || opcode.equals(EXIT_CODE)) {
                         // Close connection on null opcode (probably was EOF).
                         // Connection will be closed by try-with-resource.
                         break;
