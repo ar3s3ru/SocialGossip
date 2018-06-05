@@ -1,9 +1,8 @@
 package socialgossip.server.usecases;
 
 import socialgossip.server.core.entities.auth.UnauthorizedException;
-import socialgossip.server.core.gateways.GatewayException;
+import socialgossip.server.usecases.errors.GatewayErrorsHandler;
 
-public interface ProtectedErrorsHandler extends ErrorsHandler {
+public interface ProtectedErrorsHandler extends GatewayErrorsHandler {
     void onUnauthorizedAccess(UnauthorizedException e);
-    void onGatewayError(GatewayException e);
 }
