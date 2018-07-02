@@ -28,7 +28,7 @@ class Application {
     final ApplicationComponent  appComponent;
     final SecurityComponent     securityComponent;
     final DataproviderComponent dataproviderComponent;
-//    final NotifierComponent     notifierComponent;
+    final NotifierComponent     notifierComponent;
     final InteractorsComponent  interactorsComponent;
     final ServerComponent       serverComponent;
     final PresentationComponent presentationComponent;
@@ -37,12 +37,12 @@ class Application {
     Application() {
         appComponent          = DaggerApplicationComponent.create();
         securityComponent     = appComponent.attachSecurityComponent(new BcryptModule());
-//        notifierComponent     = appComponent.attachNotifierComponent(new NotifierModule());
         dataproviderComponent = securityComponent.attachDataproviderComponent(new InMemoryModule());
         serverComponent       = appComponent.attachServerComponent(new TCPServerModule("tcp", 8080));
         presentationComponent = serverComponent.attachPresentationComponent(new PresentersModule());
+        notifierComponent     = dataproviderComponent.attachNotifierComponent(new NotifierModule());
 
-        interactorsComponent = dataproviderComponent.attachInteractorsComponent(
+        interactorsComponent = notifierComponent.attachInteractorsComponent(
                 new RegistrationModule(), new LoginModule(), new LogoutModule()
         );
 

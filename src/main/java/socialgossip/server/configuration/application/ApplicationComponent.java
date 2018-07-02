@@ -20,5 +20,4 @@ public interface ApplicationComponent {
 
     SecurityComponent attachSecurityComponent(BcryptModule module);
     ServerComponent   attachServerComponent(TCPServerModule module);
-//    NotifierComponent attachNotifierComponent(NotifierModule module);
 }

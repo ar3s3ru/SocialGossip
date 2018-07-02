@@ -6,6 +6,8 @@ import socialgossip.server.configuration.interactors.InteractorsComponent;
 import socialgossip.server.configuration.interactors.LoginModule;
 import socialgossip.server.configuration.interactors.LogoutModule;
 import socialgossip.server.configuration.interactors.RegistrationModule;
+import socialgossip.server.configuration.notifier.NotifierComponent;
+import socialgossip.server.configuration.notifier.NotifierModule;
 import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.core.gateways.session.SessionInserter;
 import socialgossip.server.core.gateways.session.SessionRemover;
@@ -26,9 +28,5 @@ public interface DataproviderComponent {
     SessionInserter   sessionInserter();
     SessionRemover    sessionRemover();
 
-    InteractorsComponent attachInteractorsComponent(
-            RegistrationModule registrationModule,
-            LoginModule        loginModule,
-            LogoutModule       logoutModule
-    );
+    NotifierComponent attachNotifierComponent(NotifierModule module);
 }
