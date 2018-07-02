@@ -8,7 +8,10 @@ import socialgossip.server.entrypoints.tcp.login.LoginController;
 import socialgossip.server.entrypoints.tcp.registration.RegistrationController;
 
 @Component(
-        dependencies = {PresentationComponent.class, InteractorsComponent.class},
+        dependencies = {
+                PresentationComponent.class,
+                InteractorsComponent.class
+        },
         modules = {
                 RegistrationControllerModule.class,
                 LoginControllerModule.class,

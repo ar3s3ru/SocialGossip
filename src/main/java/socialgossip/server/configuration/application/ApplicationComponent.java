@@ -1,6 +1,8 @@
 package socialgossip.server.configuration.application;
 
 import dagger.Component;
+import socialgossip.server.configuration.notifier.NotifierComponent;
+import socialgossip.server.configuration.notifier.NotifierModule;
 import socialgossip.server.configuration.security.BcryptModule;
 import socialgossip.server.configuration.security.SecurityComponent;
 import socialgossip.server.configuration.server.ServerComponent;
@@ -18,4 +20,5 @@ public interface ApplicationComponent {
 
     SecurityComponent attachSecurityComponent(BcryptModule module);
     ServerComponent   attachServerComponent(TCPServerModule module);
+//    NotifierComponent attachNotifierComponent(NotifierModule module);
 }

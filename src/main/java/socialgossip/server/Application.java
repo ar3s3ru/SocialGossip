@@ -10,6 +10,8 @@ import socialgossip.server.configuration.interactors.InteractorsComponent;
 import socialgossip.server.configuration.interactors.LoginModule;
 import socialgossip.server.configuration.interactors.LogoutModule;
 import socialgossip.server.configuration.interactors.RegistrationModule;
+import socialgossip.server.configuration.notifier.NotifierComponent;
+import socialgossip.server.configuration.notifier.NotifierModule;
 import socialgossip.server.configuration.presentation.PresentationComponent;
 import socialgossip.server.configuration.presentation.PresentersModule;
 import socialgossip.server.configuration.security.BcryptModule;
@@ -26,6 +28,7 @@ class Application {
     final ApplicationComponent  appComponent;
     final SecurityComponent     securityComponent;
     final DataproviderComponent dataproviderComponent;
+//    final NotifierComponent     notifierComponent;
     final InteractorsComponent  interactorsComponent;
     final ServerComponent       serverComponent;
     final PresentationComponent presentationComponent;
@@ -34,6 +37,7 @@ class Application {
     Application() {
         appComponent          = DaggerApplicationComponent.create();
         securityComponent     = appComponent.attachSecurityComponent(new BcryptModule());
+//        notifierComponent     = appComponent.attachNotifierComponent(new NotifierModule());
         dataproviderComponent = securityComponent.attachDataproviderComponent(new InMemoryModule());
         serverComponent       = appComponent.attachServerComponent(new TCPServerModule("tcp", 8080));
         presentationComponent = serverComponent.attachPresentationComponent(new PresentersModule());
