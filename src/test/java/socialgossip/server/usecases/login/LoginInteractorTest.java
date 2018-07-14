@@ -1,11 +1,8 @@
 package socialgossip.server.usecases.login;
 
 import org.junit.Test;
-import socialgossip.server.core.entities.password.InvalidPasswordException;
 import socialgossip.server.core.entities.password.PasswordValidator;
-import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.notifications.Notifier;
-import socialgossip.server.core.gateways.session.SessionAlreadyExistsException;
 import socialgossip.server.core.gateways.session.SessionInserter;
 import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.core.gateways.user.UserNotFoundException;
@@ -38,26 +35,13 @@ public class LoginInteractorTest {
 
             @Override
             public String getPassword() { return "world"; }
-            
+
             @Override
             public String getRequestId() { return "runWithNotExistentUserTest"; }
-        }, (v) -> fail("should not complete!"), new LoginErrors() {
-            @Override
-            public void onUserNotFound(UserNotFoundException ok) { }
-
-            @Override
-            public void onSessionAlreadyExists(SessionAlreadyExistsException e) {
+        }, (v) -> fail("should not complete!"), (e) -> {
+            if (!(e instanceof UserNotFoundException)) {
                 fail(e.getMessage());
             }
-
-            @Override
-            public void onGatewayError(GatewayException e) { fail(e.getMessage()); }
-
-            @Override
-            public void onInvalidPassword(InvalidPasswordException e) { fail(e.getMessage()); }
-
-            @Override
-            public void onError(Exception e) { fail(e.getMessage()); }
         });
     }
 }

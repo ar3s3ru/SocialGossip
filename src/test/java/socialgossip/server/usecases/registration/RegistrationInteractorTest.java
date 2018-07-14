@@ -3,13 +3,9 @@ package socialgossip.server.usecases.registration;
 import org.junit.Assert;
 import org.junit.Test;
 import socialgossip.server.core.entities.password.EncryptionSchema;
-import socialgossip.server.core.entities.password.InvalidPasswordException;
 import socialgossip.server.core.entities.password.PasswordValidator;
-import socialgossip.server.core.entities.user.InvalidUserException;
 import socialgossip.server.core.entities.user.User;
-import socialgossip.server.core.gateways.GatewayException;
 import socialgossip.server.core.gateways.user.UserInserter;
-import socialgossip.server.core.gateways.user.UserAlreadyExistsException;
 import socialgossip.server.dataproviders.InMemoryRepository;
 import socialgossip.server.security.BcryptSchema;
 import socialgossip.server.security.SimplePasswordValidator;
@@ -19,8 +15,8 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class RegistrationInteractorTest {
     @Test(expected = NullPointerException.class)
@@ -62,60 +58,15 @@ public class RegistrationInteractorTest {
         final InMemoryRepository userAccess = new InMemoryRepository();
 
         final RegistrationUseCase.Input input = new RegistrationUseCase.Input() {
-            @Override
-            public String getUsername() {
-                return "hello";
-            }
-
-            @Override
-            public String getPassword() {
-                return "helloworld";
-            }
-
-            @Override
-            public String getLanguage() {
-                return Locale.getDefault().getISO3Language();
-            }
-
-            @Override
-            public String getRequestId() {
-                return "test";
-            }
+            @Override public String getUsername()  { return "hello"; }
+            @Override public String getPassword()  { return "helloworld"; }
+            @Override public String getLanguage()  { return Locale.getDefault().getISO3Language(); }
+            @Override public String getRequestId() { return "test"; }
         };
 
         Logger.getLogger(RegistrationInteractor.class.getName()).setLevel(Level.FINE);
         new RegistrationInteractor(userAccess, encryptionSchema)
-                .execute(input, Assert::assertNull, new RegistrationErrors() {
-            @Override
-            public void onInvalidLanguage(IllformedLocaleException e) {
-                fail(e.getMessage());
-            }
-
-            @Override
-            public void onInvalidUser(InvalidUserException e) {
-                fail(e.getMessage());
-            }
-
-            @Override
-            public void onUserAlreadyExists(UserAlreadyExistsException e) {
-                fail(e.getMessage());
-            }
-
-            @Override
-            public void onGatewayError(GatewayException e) {
-                fail(e.getMessage());
-            }
-
-            @Override
-            public void onInvalidPassword(InvalidPasswordException e) {
-                fail(e.getMessage());
-            }
-
-            @Override
-            public void onError(Exception e) {
-                fail(e.getMessage());
-            }
-        });
+                .execute(input, Assert::assertTrue, e -> fail(e.getMessage()));
 
         try {
             final User user = userAccess.findByUsername(input.getUsername());
@@ -125,5 +76,26 @@ public class RegistrationInteractorTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+    }
+
+    public void usingInvalidLocaleValue() {
+        final PasswordValidator passwordValidator = new SimplePasswordValidator();
+        final EncryptionSchema<String> encryptionSchema = new BcryptSchema(passwordValidator);
+        final InMemoryRepository userAccess = new InMemoryRepository();
+
+        final RegistrationUseCase.Input input = new RegistrationUseCase.Input() {
+            @Override public String getUsername()  { return "hello"; }
+            @Override public String getPassword()  { return "helloworld"; }
+            @Override public String getLanguage()  { return "invalidLocale"; }
+            @Override public String getRequestId() { return "test"; }
+        };
+
+        Logger.getLogger(RegistrationInteractor.class.getName()).setLevel(Level.FINE);
+        new RegistrationInteractor(userAccess, encryptionSchema)
+                .execute(input, Assert::assertFalse, e -> {
+                    if (!(e instanceof IllformedLocaleException)) {
+                        fail(e.getMessage());
+                    }
+                });
     }
 }

@@ -73,7 +73,7 @@ public class InMemoryRepositoryTest {
         try {
             final HashMap<String, Session> injectedSessionMap = new HashMap<>();
             final InMemoryRepository repository = new InMemoryRepository(null, injectedSessionMap);
-            final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
+            final Session session = new Session("helloworld", mock(User.class));
             repository.insert(session);
             assertEquals(session, injectedSessionMap.get(session.getToken()));
         } catch (Exception e) {
@@ -85,7 +85,7 @@ public class InMemoryRepositoryTest {
     public void addNewSessionTwiceFailing() {
         try {
             final InMemoryRepository repository = new InMemoryRepository();
-            final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
+            final Session session = new Session("helloworld", mock(User.class));
             repository.insert(session);
             try {
                 repository.insert(session);
@@ -99,7 +99,7 @@ public class InMemoryRepositoryTest {
     public void addAndRetrieveNewSession() {
         try {
             final InMemoryRepository repository = new InMemoryRepository();
-            final Session session = new Session("helloworld", mock(User.class), InetAddress.getLocalHost());
+            final Session session = new Session("helloworld", mock(User.class));
             repository.insert(session);
             assertEquals(session, repository.findByToken(session.getToken()));
         } catch (Exception e) {
