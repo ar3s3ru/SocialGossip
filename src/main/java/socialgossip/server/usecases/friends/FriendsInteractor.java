@@ -16,8 +16,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public final class FriendsInteractor
-        extends ProtectedUseCase<FriendsUseCase.Input, List<FriendshipOutput>, FriendsErrors>
-        implements FriendsUseCase<List<FriendshipOutput>, FriendsErrors> {
+        extends ProtectedUseCase<FriendsUseCase.Input, List<FriendshipOutput>>
+        implements FriendsUseCase {
 
     private static final Logger LOG = Logger.getLogger(FriendsInteractor.class.getName());
 
@@ -33,13 +33,13 @@ public final class FriendsInteractor
     protected void onAuthorizedExecute(final Session session,
                                        final FriendsUseCase.Input input,
                                        final Consumer<List<FriendshipOutput>> onSuccess,
-                                       final FriendsErrors errors) {
+                                       final Consumer<Throwable> onError) {
         try {
             final List<Friendship> friendships = retrieveFriendshipsOf(input, session.getUser());
             onSuccess.accept(produceFriendshipsOutput(input, session.getUser(), friendships));
         } catch (GatewayException e) {
             AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onGatewayError(e);
+            onError.accept(e);
         }
     }
 

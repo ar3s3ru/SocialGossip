@@ -15,8 +15,8 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public final class LogoutInteractor
-    extends ProtectedUseCase<LogoutUseCase.Input, Boolean, LogoutErrors>
-    implements LogoutUseCase<Boolean, LogoutErrors> {
+    extends ProtectedUseCase<LogoutUseCase.Input, Boolean>
+    implements LogoutUseCase {
 
     private static final Logger LOG = Logger.getLogger(LogoutInteractor.class.getName());
 
@@ -44,17 +44,14 @@ public final class LogoutInteractor
     protected void onAuthorizedExecute(final Session             session,
                                        final LogoutUseCase.Input input,
                                        final Consumer<Boolean>   onSuccess,
-                                       final LogoutErrors        errors) {
+                                       final Consumer<Throwable> onError) {
         try {
             tryRemovingSession(input, session);
             trySendingLogoutNotification(input, session);
             onSuccess.accept(true);
-        } catch (SessionNotFoundException e) {
+        } catch (SessionNotFoundException | GatewayException e) {
             AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onSessionNotFound(e);
-        } catch (GatewayException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onGatewayError(e);
+            onError.accept(e);
         }
     }
 

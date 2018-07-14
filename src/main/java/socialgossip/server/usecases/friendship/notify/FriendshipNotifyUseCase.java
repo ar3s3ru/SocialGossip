@@ -4,7 +4,6 @@ import socialgossip.server.core.entities.auth.ProtectedResource;
 import socialgossip.server.core.entities.session.Session;
 import socialgossip.server.core.gateways.notifications.NotificationHandler;
 import socialgossip.server.usecases.PreAuthInput;
-import socialgossip.server.usecases.ProtectedErrorsHandler;
 import socialgossip.server.usecases.UseCase;
 
 import java.util.function.Function;

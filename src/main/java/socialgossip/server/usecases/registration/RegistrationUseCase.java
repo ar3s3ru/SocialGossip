@@ -1,17 +1,12 @@
 package socialgossip.server.usecases.registration;
 
-import socialgossip.server.usecases.ErrorsHandler;
 import socialgossip.server.usecases.UseCase;
 
 /**
  * Represents a new {@link socialgossip.server.core.entities.user.User}
  * registration {@link UseCase}.
- * @param <O> is the output type, produced after the use-case execution.
- * @param <E> is the {@link ErrorsHandler} that allows to handle error cases
- *            happened from the use-case execution.
  */
-public interface RegistrationUseCase<O, E extends ErrorsHandler>
-        extends UseCase<RegistrationUseCase.Input, O, E> {
+public interface RegistrationUseCase extends UseCase<RegistrationUseCase.Input, Boolean> {
     /**
      * Represents the input of the registration use-case.
      */

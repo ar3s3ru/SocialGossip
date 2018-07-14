@@ -15,8 +15,8 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public final class LookupInteractor
-        extends ProtectedUseCase<LookupUseCase.Input, LookupDetails, LookupErrors>
-        implements LookupUseCase<LookupDetails, LookupErrors> {
+        extends ProtectedUseCase<LookupUseCase.Input, LookupDetails>
+        implements LookupUseCase {
 
     private static final Logger LOG = Logger.getLogger(LookupInteractor.class.getName());
 
@@ -32,16 +32,13 @@ public final class LookupInteractor
     protected void onAuthorizedExecute(final Session                 session,
                                        final LookupUseCase.Input     input,
                                        final Consumer<LookupDetails> onSuccess,
-                                       final LookupErrors            errors) {
+                                       final Consumer<Throwable>     onError) {
         try {
            final UserFriendship details = retrieveUserFriendshipDetails(input, session);
            onSuccess.accept(createLookupDetailsResultFrom(details));
-        } catch (UserNotFoundException e) {
+        } catch (UserNotFoundException | GatewayException e) {
             AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onUserNotFound(e);
-        } catch (GatewayException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onGatewayError(e);
+            onError.accept(e);
         }
     }
 

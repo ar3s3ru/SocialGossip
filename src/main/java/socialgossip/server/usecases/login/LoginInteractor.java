@@ -22,8 +22,8 @@ import java.util.logging.Logger;
  * Implementation for {@link LoginUseCase}.
  */
 public final class LoginInteractor
-        extends AbstractUseCase<LoginUseCase.Input, LoginOutput, LoginErrors>
-        implements LoginUseCase<LoginOutput, LoginErrors> {
+        extends AbstractUseCase<LoginUseCase.Input, LoginOutput>
+        implements LoginUseCase {
 
     private final static Logger LOG = Logger.getLogger(LoginInteractor.class.getName());
 
@@ -58,25 +58,19 @@ public final class LoginInteractor
     }
 
     @Override
-    protected void onExecute(LoginUseCase.Input input, Consumer<LoginOutput> onSuccess, LoginErrors errors) {
+    protected void onExecute(final LoginUseCase.Input    input,
+                             final Consumer<LoginOutput> onSuccess,
+                             final Consumer<Throwable>   onError) {
         try {
             final User user = retrieveUserByUsername(input);
             validateInputPassword(input, user);
             final Session session = createAndAddNewSession(input, user);
             sendingLoginNotification(input, session);
             onSuccess.accept(produceNewOutput(session));
-        } catch (UserNotFoundException e) {
+        } catch (UserNotFoundException | InvalidPasswordException |
+                SessionAlreadyExistsException | GatewayException e) {
             AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onUserNotFound(e);
-        } catch (InvalidPasswordException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onInvalidPassword(e);
-        } catch (SessionAlreadyExistsException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onSessionAlreadyExists(e);
-        } catch (GatewayException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onGatewayError(e);
+            onError.accept(e);
         }
     }
 

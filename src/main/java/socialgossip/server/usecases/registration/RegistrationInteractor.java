@@ -22,8 +22,8 @@ import java.util.logging.Logger;
  * Implementation for the {@link RegistrationUseCase}.
  */
 public final class RegistrationInteractor
-        extends AbstractUseCase<RegistrationUseCase.Input, Void, RegistrationErrors>
-        implements RegistrationUseCase<Void, RegistrationErrors> {
+        extends AbstractUseCase<RegistrationUseCase.Input, Boolean>
+        implements RegistrationUseCase {
 
     private final static Logger LOG = Logger.getLogger(RegistrationInteractor.class.getName());
 
@@ -79,29 +79,18 @@ public final class RegistrationInteractor
 
     @Override
     protected void onExecute(final RegistrationUseCase.Input input,
-                             final Consumer<Void>            onSuccess,
-                             final RegistrationErrors        errors) {
+                             final Consumer<Boolean>         onSuccess,
+                             final Consumer<Throwable>       onError) {
         try {
             final Locale lang = produceLanguageLocale(input);
             final EncryptedPassword<?> password = produceEncryptedPassword(input);
             final User user = produceNewUser(input, lang, password);
             trySavingNewUser(input, user);
-            onSuccess.accept(null);
-        } catch (IllformedLocaleException e) {
+            onSuccess.accept(true);
+        } catch (IllformedLocaleException | InvalidPasswordException   |
+                InvalidUserException      | UserAlreadyExistsException | GatewayException e) {
             AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onInvalidLanguage(e);
-        } catch (InvalidPasswordException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onInvalidPassword(e);
-        } catch (InvalidUserException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onInvalidUser(e);
-        } catch (UserAlreadyExistsException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onUserAlreadyExists(e);
-        } catch (GatewayException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onGatewayError(e);
+            onError.accept(e);
         }
     }
 

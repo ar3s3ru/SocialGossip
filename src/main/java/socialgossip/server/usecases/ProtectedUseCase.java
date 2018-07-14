@@ -12,8 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends ProtectedErrorsHandler>
-        extends AbstractUseCase<I, O, E>
+public abstract class ProtectedUseCase<I extends PreAuthInput, O> extends AbstractUseCase<I, O>
         implements ProtectedResource {
 
     protected final SessionFinder sessionFinder;
@@ -22,32 +21,30 @@ public abstract class ProtectedUseCase<I extends PreAuthInput, O, E extends Prot
         this.sessionFinder = Objects.requireNonNull(sessionAccess);
     }
 
-    protected abstract void onAuthorizedExecute(Session session, I input, Consumer<O> onSuccess, E errors);
+    protected abstract void onAuthorizedExecute(Session session,
+                                                I input,
+                                                Consumer<O>         onSuccess,
+                                                Consumer<Throwable> onError);
 
     @Override
     public void checkAllowance(final Permission permission) throws UnauthorizedException {
-        Optional.ofNullable(permission).orElseThrow(
-                () -> new UnauthorizedException("<null>", "null tokens can't be authorized on logout")
-        );
+        Optional.ofNullable(permission)
+                .orElseThrow(() -> new UnauthorizedException("<null>", "null tokens can't be authorized on logout"));
         if (permission.isExpired()) {
             throw new UnauthorizedException(permission.getToken(), "permission expired");
         }
     }
 
     @Override
-    protected final void onExecute(I input, Consumer<O> onSuccess, E errors) {
+    protected final void onExecute(I input, Consumer<O> onSuccess, Consumer<Throwable> onError) {
         try {
             final Session session = sessionFinder.findByToken(input.getSessionToken());
             this.checkAllowance(session);
-            this.onAuthorizedExecute(session, input, onSuccess, errors);
-        } catch (GatewayException e) {
-            errors.onGatewayError(e);
+            this.onAuthorizedExecute(session, input, onSuccess, onError);
+        } catch (GatewayException | UnauthorizedException e) {
+            onError.accept(e);
         } catch (SessionNotFoundException e) {
-            errors.onUnauthorizedAccess(
-                    new UnauthorizedException(input.getSessionToken(), e.getMessage())
-            );
-        } catch (UnauthorizedException e) {
-            errors.onUnauthorizedAccess(e);
+            onError.accept(new UnauthorizedException(input.getSessionToken(), e.getMessage()));
         }
     }
 }

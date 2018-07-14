@@ -5,7 +5,6 @@ import socialgossip.server.core.gateways.notifications.NotificationHandler;
 import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.core.gateways.session.SessionFinder;
 import socialgossip.server.logging.AppLogger;
-import socialgossip.server.usecases.ProtectedErrorsHandler;
 import socialgossip.server.usecases.ProtectedUseCase;
 
 import java.util.Objects;

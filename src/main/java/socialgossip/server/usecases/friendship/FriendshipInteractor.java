@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public final class FriendshipInteractor
-        extends ProtectedUseCase<FriendshipUseCase.Input, FriendshipOutput, FriendshipErrors>
-        implements FriendshipUseCase<FriendshipOutput, FriendshipErrors> {
+        extends ProtectedUseCase<FriendshipUseCase.Input, FriendshipOutput>
+        implements FriendshipUseCase{
 
     private static final Logger LOG = Logger.getLogger(FriendshipInteractor.class.getName());
 
@@ -50,25 +50,17 @@ public final class FriendshipInteractor
     protected void onAuthorizedExecute(final Session session,
                                        final FriendshipUseCase.Input input,
                                        final Consumer<FriendshipOutput> onSuccess,
-                                       final FriendshipErrors errors) {
+                                       final Consumer<Throwable>        onError) {
         try {
             final User target = getTargetUserFrom(input);
             final Friendship friendship = produceNewFriendship(input, session.getUser(), target);
             trySavingFriendship(input, friendship);
             sendFriendshipNotification(input, session, target);
             onSuccess.accept(produceFriendshipOutput(input, friendship));
-        } catch (UserNotFoundException e) {
+        } catch (UserNotFoundException           | InvalidFriendshipException |
+                FriendshipAlreadyExistsException | GatewayException e) {
             AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onUserNotFound(e);
-        } catch (InvalidFriendshipException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onInvalidFriendship(e);
-        } catch (FriendshipAlreadyExistsException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onFriendshipAlreadyExists(e);
-        } catch (GatewayException e) {
-            AppLogger.exception(LOG, input::getRequestId, e);
-            errors.onGatewayError(e);
+            onError.accept(e);
         }
     }
 
