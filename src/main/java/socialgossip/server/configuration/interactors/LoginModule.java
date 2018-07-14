@@ -7,12 +7,13 @@ import socialgossip.server.core.gateways.notifications.Notifier;
 import socialgossip.server.core.gateways.session.SessionInserter;
 import socialgossip.server.core.gateways.user.UserFinder;
 import socialgossip.server.usecases.login.LoginInteractor;
+import socialgossip.server.usecases.login.LoginUseCase;
 import socialgossip.server.usecases.login.SessionFactory;
 
-@Module(includes = InteractorsModule.class)
+@Module
 public class LoginModule {
     @Provides
-    @UseCaseScope static LoginInteractor providesLoginInteractor(
+    @UseCaseScope static LoginUseCase providesLoginInteractor(
             final UserFinder        userFinder,
             final SessionInserter   sessionInserter,
             final SessionFactory    sessionFactory,
