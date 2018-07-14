@@ -5,7 +5,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import socialgossip.server.logging.AppLogger;
 import socialgossip.server.presentation.Presenter;
-import socialgossip.server.usecases.ErrorsHandler;
 import socialgossip.server.usecases.UseCase;
 import socialgossip.server.validation.Validable;
 import socialgossip.server.validation.ValidationException;
@@ -20,23 +19,23 @@ public abstract class AbstractController<
         // Presenter could optionally use a different argument type from the usecase output.
         PresenterType,
         // Use case type classes.
-        InputType extends UseCase.Input, OutputType, ErrorType extends ErrorsHandler
+        InputType extends UseCase.Input, OutputType
         > implements Controller<InputType> {
 
     protected final Logger LOG = Logger.getLogger(this.getClass().getName());
 
     protected final Presenter<PresenterType> presenter;
-    protected final UseCase<InputType, OutputType, ErrorType> interactor;
+    protected final UseCase<InputType, OutputType> interactor;
 
     public AbstractController(final Presenter<PresenterType> presenter,
-                              final UseCase<InputType, OutputType, ErrorType> interactor) {
+                              final UseCase<InputType, OutputType> interactor) {
         this.presenter  = Objects.requireNonNull(presenter);
         this.interactor = Objects.requireNonNull(interactor);
     }
 
     protected abstract InputType produceInputObject(final TCPRequest request, final JSONObject object);
     protected abstract Consumer<OutputType> produceOutputConsumer(final TCPRequest request, final Writer responseWriter);
-    protected abstract ErrorType produceErrorHandler(final TCPRequest request, final Writer responseWriter);
+    protected abstract Consumer<Throwable> produceErrorHandler(final TCPRequest request, final Writer responseWriter);
 
     protected void validateInputObject(final InputType input) throws ValidationException {
         if (input instanceof Validable) {

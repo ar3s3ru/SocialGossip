@@ -9,7 +9,6 @@ import socialgossip.server.entrypoints.tcp.IOConsumer;
 import socialgossip.server.entrypoints.tcp.TCPRequest;
 import socialgossip.server.presentation.Presenter;
 import socialgossip.server.usecases.UseCase;
-import socialgossip.server.usecases.logout.LogoutErrors;
 import socialgossip.server.usecases.logout.LogoutUseCase;
 
 import java.io.Writer;

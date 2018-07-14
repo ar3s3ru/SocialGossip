@@ -10,7 +10,6 @@ import socialgossip.server.entrypoints.tcp.IOConsumer;
 import socialgossip.server.entrypoints.tcp.TCPRequest;
 import socialgossip.server.presentation.Presenter;
 import socialgossip.server.usecases.UseCase;
-import socialgossip.server.usecases.login.LoginErrors;
 import socialgossip.server.usecases.login.LoginOutput;
 import socialgossip.server.usecases.login.LoginUseCase;
 

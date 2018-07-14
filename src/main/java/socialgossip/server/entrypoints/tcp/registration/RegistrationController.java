@@ -10,7 +10,6 @@ import socialgossip.server.entrypoints.tcp.IOConsumer;
 import socialgossip.server.entrypoints.tcp.TCPRequest;
 import socialgossip.server.presentation.Presenter;
 import socialgossip.server.usecases.UseCase;
-import socialgossip.server.usecases.registration.RegistrationErrors;
 import socialgossip.server.usecases.registration.RegistrationUseCase;
 
 import java.io.Writer;
@@ -19,10 +18,10 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class RegistrationController
-        extends AbstractController<String, RegistrationUseCase.Input, Void, RegistrationErrors> {
+        extends AbstractController<String, RegistrationUseCase.Input, Boolean> {
 
     public RegistrationController(final Presenter<String> presenter,
-                                  final UseCase<RegistrationUseCase.Input, Void, RegistrationErrors> interactor) {
+                                  final RegistrationUseCase interactor) {
         super(presenter, interactor);
     }
 
@@ -37,8 +36,8 @@ public class RegistrationController
     }
 
     @Override
-    protected Consumer<Void> produceOutputConsumer(final TCPRequest request, final Writer responseWriter) {
-        return (IOConsumer<Void>) (v) -> {
+    protected Consumer<Boolean> produceOutputConsumer(final TCPRequest request, final Writer responseWriter) {
+        return (IOConsumer<Boolean>) (v) -> {
             responseWriter.write(presenter.getOkResponse(
                     (String) request.contextGet("username")
             ).toJSONString());
@@ -46,7 +45,7 @@ public class RegistrationController
     }
 
     @Override
-    protected RegistrationErrors produceErrorHandler(final TCPRequest request, final Writer responseWriter) {
+    protected Consumer<Throwable> produceErrorHandler(final TCPRequest request, final Writer responseWriter) {
         return new RegistrationErrors() {
             @Override
             public void onInvalidLanguage(final IllformedLocaleException e) {
