@@ -5,7 +5,6 @@ import socialgossip.server.entrypoints.tcp.JSONInput;
 import socialgossip.server.usecases.login.LoginUseCase;
 import socialgossip.server.validation.ValidationException;
 
-import java.net.InetAddress;
 import java.util.Optional;
 
 public class LoginJSONInput extends JSONInput implements LoginUseCase.Input {
@@ -14,7 +13,6 @@ public class LoginJSONInput extends JSONInput implements LoginUseCase.Input {
 
     private final String username;
     private final String password;
-    private InetAddress ipAddress;
 
     public LoginJSONInput(final String requestId, final JSONObject jsonObject) {
         super(requestId, jsonObject);
@@ -41,15 +39,5 @@ public class LoginJSONInput extends JSONInput implements LoginUseCase.Input {
     @Override
     public String getPassword() {
         return password;
-    }
-
-    public LoginJSONInput withIpAddress(final InetAddress ipAddress) {
-        this.ipAddress = ipAddress;
-        return this;
-    }
-
-    @Override
-    public InetAddress getIpAddress() {
-        return ipAddress;
     }
 }

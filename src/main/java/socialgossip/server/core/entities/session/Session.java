@@ -55,25 +55,18 @@ public class Session implements Permission {
         return proposedToken;
     }
 
-    private final String      token;
-    private final User        user;
-    private final Date        expireDate;
-    private final InetAddress ipAddress;
+    private final String token;
+    private final User   user;
+    private final Date   expireDate;
 
-    public Session(final String      token,
-                   final User        user,
-                   final InetAddress ipAddress) throws InvalidTokenException {
-        this(token, user, DEFAULT_EXPIRE_DATE_SUPPLIER.get(), ipAddress);
+    public Session(final String token, final User user) throws InvalidTokenException {
+        this(token, user, DEFAULT_EXPIRE_DATE_SUPPLIER.get());
     }
 
-    public Session(final String      token,
-                   final User        user,
-                   final Date        expireDate,
-                   final InetAddress ipAddress) throws InvalidTokenException {
+    public Session(final String token, final User user, final Date expireDate) throws InvalidTokenException {
         this.token       = checkSessionToken(token);
         this.user        = Objects.requireNonNull(user);
         this.expireDate  = checkExpirationDate(expireDate);
-        this.ipAddress   = Objects.requireNonNull(ipAddress);
     }
 
     @Override
@@ -99,10 +92,6 @@ public class Session implements Permission {
         return user;
     }
 
-    public InetAddress getIpAddress() {
-        return ipAddress;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -122,7 +111,6 @@ public class Session implements Permission {
                 "token='" + token + '\'' +
                 ", user=" + user +
                 ", expireDate=" + expireDate +
-                ", ipAddress=" + ipAddress +
                 '}';
     }
 }

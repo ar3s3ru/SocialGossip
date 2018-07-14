@@ -27,8 +27,7 @@ public class LoginController
 
     @Override
     protected LoginUseCase.Input produceInputObject(final TCPRequest request, final JSONObject object) {
-        return (new LoginJSONInput(request.getId(), object))
-                .withIpAddress(request.getIpAddress());
+        return new LoginJSONInput(request.getId(), object);
     }
 
     @Override

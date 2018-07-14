@@ -102,7 +102,7 @@ public final class LoginInteractor
 
     private Session createAndAddNewSession(final LoginUseCase.Input input, final User user)
             throws SessionAlreadyExistsException, GatewayException{
-        final Session session = sessionFactory.produce(user, input.getIpAddress());
+        final Session session = sessionFactory.produce(user);
         AppLogger.info(LOG, input::getRequestId, () -> "produced new Session: " + session);
 
         AppLogger.fine(LOG, input::getRequestId, () -> "writing to repository...");
